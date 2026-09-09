@@ -1,9 +1,10 @@
 import React, { useEffect } from 'react'
 import { Target, Award, CheckCircle2, TrendingUp } from 'lucide-react'
 import confetti from 'canvas-confetti'
+import { formatThaiMonth } from '../lib/dateUtils'
 
-export default function MonthlyGoal({ monthlyRides, monthlyGoal, deductDepreciation }) {
-  const currentMonthName = new Date().toLocaleDateString('th-TH', { month: 'long', year: 'numeric' })
+export default function MonthlyGoal({ monthlyRides, monthlyGoal, deductDepreciation, selectedDate }) {
+  const currentMonthName = formatThaiMonth(selectedDate)
 
   // Calculate monthly stats
   const totalMonthlyNet = monthlyRides.reduce((sum, r) => sum + Number(r.net_income || 0), 0)

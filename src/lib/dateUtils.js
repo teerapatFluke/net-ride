@@ -35,3 +35,17 @@ export const formatThaiDate = (dateString) => {
     return dateString
   }
 }
+
+export const formatThaiMonth = (dateString) => {
+  if (!dateString) return ''
+  try {
+    const [year, month] = dateString.split('-').map(Number)
+    const date = new Date(year, month - 1, 1)
+    return date.toLocaleDateString('th-TH', {
+      month: 'long',
+      year: 'numeric',
+    })
+  } catch {
+    return dateString
+  }
+}

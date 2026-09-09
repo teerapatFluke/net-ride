@@ -384,6 +384,7 @@ export default function App() {
         monthlyRides={ridesForMonth}
         monthlyGoal={settings.monthly_goal}
         deductDepreciation={deductDepreciation}
+        selectedDate={selectedDate}
       />
 
       {/* List of rides today */}
