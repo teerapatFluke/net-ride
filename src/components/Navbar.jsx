@@ -5,24 +5,9 @@ export default function Navbar({ user, onOpenSettings, onOpenExport, onSignOut }
   return (
     <header className="navbar">
       <div className="brand-section">
-        <img src="./logo.jpeg" alt="Net Ride Logo" className="brand-logo" />
+        <img src="./image.png" alt="Net Ride Logo" className="brand-logo" />
         <div className="brand-info">
-          <h1>
-            NET RIDE
-            <span style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              background: 'rgba(16, 185, 129, 0.15)',
-              color: 'var(--emerald-400)',
-              borderRadius: '999px',
-              padding: '2px 6px',
-              fontSize: '0.62rem',
-              fontWeight: 700,
-              letterSpacing: '0.04em'
-            }}>
-              PRO
-            </span>
-          </h1>
+          <h1>NET RIDE</h1>
           <span>คำนวณรายได้สุทธิหักค่าน้ำมัน</span>
         </div>
       </div>
