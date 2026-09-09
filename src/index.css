@@ -722,3 +722,14 @@ body {
   font-weight: 600;
   margin-bottom: 20px;
 }
+
+.cal-day-cell:hover {
+  background: rgba(255, 255, 255, 0.12) !important;
+  border-color: rgba(255, 255, 255, 0.3) !important;
+  transform: translateY(-1px);
+}
+
+.date-display:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+

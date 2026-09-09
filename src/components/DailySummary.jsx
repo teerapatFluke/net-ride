@@ -6,6 +6,7 @@ export default function DailySummary({
   selectedDate,
   onDateChange,
   ridesForDay,
+  onOpenCalendar,
 }) {
   const isToday = () => {
     return selectedDate === getTodayString()
@@ -36,14 +37,24 @@ export default function DailySummary({
           <ChevronLeft size={20} />
         </button>
 
-        <div className="date-display">
+        <div
+          className="date-display"
+          onClick={onOpenCalendar}
+          style={{ cursor: 'pointer', padding: '4px 8px', borderRadius: '8px' }}
+          title="แตะเพื่อเปิดปฏิทินสรุปรายรับ"
+        >
           <Calendar size={16} style={{ color: 'var(--emerald-400)' }} />
-          <span>{formatThaiDate(selectedDate)}</span>
+          <span style={{ textDecoration: 'underline dotted', textUnderlineOffset: '4px' }}>
+            {formatThaiDate(selectedDate)}
+          </span>
           {isToday() ? (
             <span className="today-badge">วันนี้</span>
           ) : (
             <button
-              onClick={() => onDateChange(getTodayString())}
+              onClick={(e) => {
+                e.stopPropagation()
+                onDateChange(getTodayString())
+              }}
               style={{
                 background: 'transparent',
                 border: 'none',

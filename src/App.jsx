@@ -7,6 +7,7 @@ import RideList from './components/RideList'
 import AddRideModal from './components/AddRideModal'
 import SettingsModal from './components/SettingsModal'
 import ExportModal from './components/ExportModal'
+import CalendarModal from './components/CalendarModal'
 import Auth from './components/Auth'
 import { Plus, ShieldAlert } from 'lucide-react'
 import { getTodayString } from './lib/dateUtils'
@@ -26,6 +27,7 @@ export default function App() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
   const [isExportOpen, setIsExportOpen] = useState(false)
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [editingRide, setEditingRide] = useState(null)
 
   // 1. Check & listen for Auth state
@@ -256,6 +258,7 @@ export default function App() {
         selectedDate={selectedDate}
         onDateChange={(newDate) => setSelectedDate(newDate)}
         ridesForDay={ridesForDay}
+        onOpenCalendar={() => setIsCalendarOpen(true)}
       />
 
       {/* Monthly Goal Tracker */}
@@ -315,6 +318,15 @@ export default function App() {
       <ExportModal
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
+        allRides={rides}
+      />
+
+      {/* Calendar Modal */}
+      <CalendarModal
+        isOpen={isCalendarOpen}
+        onClose={() => setIsCalendarOpen(false)}
+        selectedDate={selectedDate}
+        onSelectDate={(d) => setSelectedDate(d)}
         allRides={rides}
       />
     </div>
