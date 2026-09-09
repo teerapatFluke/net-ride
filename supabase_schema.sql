@@ -21,7 +21,7 @@ CREATE TABLE IF NOT EXISTS public.ride_logs (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
     log_date DATE NOT NULL DEFAULT CURRENT_DATE,
-    platform TEXT NOT NULL CHECK (platform IN ('Grab', 'Bolt', 'Line Man', 'inDrive', 'Robinhood', 'Other')),
+    platform TEXT NOT NULL, -- รองรับ multiple platforms เช่น 'Grab, Bolt'
     gross_income NUMERIC(10, 2) NOT NULL CHECK (gross_income >= 0),
     distance_km NUMERIC(8, 2) NOT NULL CHECK (distance_km >= 0),
     fuel_price NUMERIC(6, 2) NOT NULL CHECK (fuel_price > 0),
@@ -32,6 +32,9 @@ CREATE TABLE IF NOT EXISTS public.ride_logs (
     created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
     updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+-- ปลดล็อก constraint เดิมเพื่อให้รองรับการเลือกหลายแพลตฟอร์มพร้อมกัน (เช่น 'Grab, Bolt')
+ALTER TABLE public.ride_logs DROP CONSTRAINT IF EXISTS ride_logs_platform_check;
 
 -- Create Index for fast date querying
 CREATE INDEX IF NOT EXISTS idx_ride_logs_user_date ON public.ride_logs(user_id, log_date DESC);

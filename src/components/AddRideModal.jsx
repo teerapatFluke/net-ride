@@ -15,7 +15,7 @@ export default function AddRideModal({
   if (!isOpen) return null
 
   const [date, setDate] = useState(initialDate || getTodayString())
-  const [platform, setPlatform] = useState('Grab')
+  const [platforms, setPlatforms] = useState(['Grab'])
   const [grossIncome, setGrossIncome] = useState('')
   const [distanceKm, setDistanceKm] = useState('')
   const [fuelPrice, setFuelPrice] = useState(defaultFuelPrice.toString())
@@ -28,7 +28,7 @@ export default function AddRideModal({
   useEffect(() => {
     if (editRide) {
       setDate(editRide.log_date || initialDate)
-      setPlatform(editRide.platform || 'Grab')
+      setPlatforms(editRide.platform ? editRide.platform.split(',').map(s => s.trim()).filter(Boolean) : ['Grab'])
       setGrossIncome(editRide.gross_income?.toString() || '')
       setDistanceKm(editRide.distance_km?.toString() || '')
       setFuelPrice(editRide.fuel_price?.toString() || defaultFuelPrice.toString())
@@ -36,7 +36,7 @@ export default function AddRideModal({
       setNotes(editRide.notes || '')
     } else {
       setDate(initialDate || getTodayString())
-      setPlatform('Grab')
+      setPlatforms(['Grab'])
       setGrossIncome('')
       setDistanceKm('')
       setFuelPrice(defaultFuelPrice.toString())
@@ -44,6 +44,16 @@ export default function AddRideModal({
       setNotes('')
     }
   }, [editRide, isOpen, initialDate, defaultEfficiency, defaultFuelPrice])
+
+  const togglePlatform = (p) => {
+    if (platforms.includes(p)) {
+      if (platforms.length > 1) {
+        setPlatforms(platforms.filter(item => item !== p))
+      }
+    } else {
+      setPlatforms([...platforms, p])
+    }
+  }
 
   // Real-time calculation
   const gross = parseFloat(grossIncome) || 0
@@ -73,7 +83,7 @@ export default function AddRideModal({
       await onSave({
         id: editRide?.id,
         log_date: date,
-        platform,
+        platform: platforms.join(', '),
         gross_income: gross,
         distance_km: dist,
         fuel_price: price,
@@ -117,44 +127,102 @@ export default function AddRideModal({
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* Platform Selector Buttons */}
+          {/* Platform Selector Buttons (Multiple Select) */}
           <div className="form-group">
             <label className="form-label">
-              <span>เลือกแพลตฟอร์ม</span>
-              <Car size={14} />
+              <span>เลือกแพลตฟอร์ม (เลือกได้มากกว่า 1 ค่าย)</span>
+              <span style={{ fontSize: '0.72rem', color: 'var(--emerald-400)', fontWeight: 600 }}>
+                เลือกแล้ว {platforms.length} ค่าย {platforms.length > 1 && `(${platforms.join(' + ')})`}
+              </span>
             </label>
+
             {/* Top 3 Platforms: Grab, Bolt, Line Man */}
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '8px' }}>
+              {/* GRAB */}
               <button
                 type="button"
-                className={`platform-btn ${platform === 'Grab' ? 'active grab' : ''}`}
-                onClick={() => setPlatform('Grab')}
-                style={{ padding: '8px 4px', flexDirection: 'column', gap: '4px' }}
+                className={`platform-btn ${platforms.includes('Grab') ? 'active grab' : ''}`}
+                onClick={() => togglePlatform('Grab')}
+                style={{
+                  padding: '10px 4px',
+                  flexDirection: 'column',
+                  gap: '4px',
+                  position: 'relative',
+                  borderWidth: platforms.includes('Grab') ? '1.5px' : '1px'
+                }}
               >
+                {platforms.includes('Grab') && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '4px',
+                    right: '6px',
+                    fontSize: '0.65rem',
+                    color: '#38ef7d',
+                    fontWeight: 900
+                  }}>
+                    ✓
+                  </span>
+                )}
                 <PlatformBadge platform="Grab" size="md" showText={false} />
                 <span style={{ fontSize: '0.76rem', fontWeight: 800 }}>GRAB</span>
               </button>
+
+              {/* BOLT */}
               <button
                 type="button"
-                className={`platform-btn ${platform === 'Bolt' ? 'active bolt' : ''}`}
-                onClick={() => setPlatform('Bolt')}
-                style={{ padding: '8px 4px', flexDirection: 'column', gap: '4px' }}
+                className={`platform-btn ${platforms.includes('Bolt') ? 'active bolt' : ''}`}
+                onClick={() => togglePlatform('Bolt')}
+                style={{
+                  padding: '10px 4px',
+                  flexDirection: 'column',
+                  gap: '4px',
+                  position: 'relative',
+                  borderWidth: platforms.includes('Bolt') ? '1.5px' : '1px'
+                }}
               >
+                {platforms.includes('Bolt') && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '4px',
+                    right: '6px',
+                    fontSize: '0.65rem',
+                    color: '#34d186',
+                    fontWeight: 900
+                  }}>
+                    ✓
+                  </span>
+                )}
                 <PlatformBadge platform="Bolt" size="md" showText={false} />
                 <span style={{ fontSize: '0.76rem', fontWeight: 800 }}>BOLT</span>
               </button>
+
+              {/* LINE MAN */}
               <button
                 type="button"
-                className={`platform-btn ${platform === 'Line Man' ? 'active lineman' : ''}`}
-                onClick={() => setPlatform('Line Man')}
+                className={`platform-btn ${platforms.includes('Line Man') ? 'active lineman' : ''}`}
+                onClick={() => togglePlatform('Line Man')}
                 style={{
-                  padding: '8px 4px',
+                  padding: '10px 4px',
                   flexDirection: 'column',
                   gap: '4px',
-                  borderColor: platform === 'Line Man' ? '#06c755' : undefined,
-                  background: platform === 'Line Man' ? 'rgba(6, 199, 85, 0.15)' : undefined
+                  position: 'relative',
+                  borderColor: platforms.includes('Line Man') ? '#06c755' : undefined,
+                  background: platforms.includes('Line Man') ? 'rgba(6, 199, 85, 0.18)' : undefined,
+                  borderWidth: platforms.includes('Line Man') ? '1.5px' : '1px'
                 }}
               >
+                {platforms.includes('Line Man') && (
+                  <span style={{
+                    position: 'absolute',
+                    top: '4px',
+                    right: '6px',
+                    fontSize: '0.65rem',
+                    color: '#22c55e',
+                    fontWeight: 900
+                  }}>
+                    ✓
+                  </span>
+                )}
                 <PlatformBadge platform="Line Man" size="md" showText={false} />
                 <span style={{ fontSize: '0.76rem', fontWeight: 800 }}>LINE MAN</span>
               </button>
@@ -162,30 +230,34 @@ export default function AddRideModal({
 
             {/* inDrive & Other options */}
             <div style={{ display: 'flex', gap: '8px' }}>
-              {['inDrive', 'Other'].map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setPlatform(p)}
-                  style={{
-                    flex: 1,
-                    background: platform === p ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.04)',
-                    border: `1px solid ${platform === p ? '#fff' : 'var(--border-subtle)'}`,
-                    color: platform === p ? '#fff' : 'var(--text-secondary)',
-                    borderRadius: 'var(--radius-sm)',
-                    padding: '8px',
-                    fontSize: '0.78rem',
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    gap: '6px'
-                  }}
-                >
-                  <PlatformBadge platform={p} size="sm" showText={true} />
-                </button>
-              ))}
+              {['inDrive', 'Other'].map((p) => {
+                const isSelected = platforms.includes(p)
+                return (
+                  <button
+                    key={p}
+                    type="button"
+                    onClick={() => togglePlatform(p)}
+                    style={{
+                      flex: 1,
+                      background: isSelected ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.04)',
+                      border: `1.5px solid ${isSelected ? '#fff' : 'var(--border-subtle)'}`,
+                      color: isSelected ? '#fff' : 'var(--text-secondary)',
+                      borderRadius: 'var(--radius-sm)',
+                      padding: '8px',
+                      fontSize: '0.78rem',
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '6px'
+                    }}
+                  >
+                    {isSelected && <span style={{ color: 'var(--emerald-400)', fontWeight: 800 }}>✓</span>}
+                    <PlatformBadge platform={p} size="sm" showText={true} />
+                  </button>
+                )
+              })}
             </div>
           </div>
 

@@ -3,6 +3,17 @@ import { Car } from 'lucide-react'
 
 // Professional Platform Logo & Badge Component
 export default function PlatformBadge({ platform, size = 'md', showText = true, className = '' }) {
+  if (typeof platform === 'string' && platform.includes(',')) {
+    const list = platform.split(',').map(s => s.trim()).filter(Boolean)
+    return (
+      <span style={{ display: 'inline-flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+        {list.map(p => (
+          <PlatformBadge key={p} platform={p} size={size} showText={showText} className={className} />
+        ))}
+      </span>
+    )
+  }
+
   const isLg = size === 'lg'
   const isSm = size === 'sm'
 
