@@ -31,6 +31,8 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
       'ราคาน้ำมัน (บาท/ลิตร)',
       'อัตราสิ้นเปลือง (กม./ลิตร)',
       'ค่าน้ำมัน (บาท)',
+      'ค่าเสื่อมต่อกม. (บาท/กม.)',
+      'รวมค่าเสื่อม (บาท)',
       'กำไรสุทธิ (บาท)',
       'หมายเหตุ',
     ]
@@ -38,6 +40,8 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
     const csvRows = [headers.join(',')]
 
     for (const r of exportData) {
+      const depRate = Number(r.depreciation_per_km || 0)
+      const depCost = Number((Number(r.distance_km || 0) * depRate).toFixed(2))
       const row = [
         `"${r.log_date}"`,
         `"${r.platform}"`,
@@ -46,6 +50,8 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
         r.fuel_price,
         r.fuel_efficiency,
         r.fuel_cost,
+        depRate,
+        depCost,
         r.net_income,
         `"${(r.notes || '').replace(/"/g, '""')}"`,
       ]

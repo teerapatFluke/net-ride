@@ -9,6 +9,7 @@ export default function AddRideModal({
   onSave,
   defaultEfficiency = 15.0,
   defaultFuelPrice = 38.0,
+  defaultDepreciation = 0.0,
   initialDate,
   editRide = null,
 }) {
@@ -20,6 +21,7 @@ export default function AddRideModal({
   const [distanceKm, setDistanceKm] = useState('')
   const [fuelPrice, setFuelPrice] = useState(defaultFuelPrice.toString())
   const [fuelEfficiency, setFuelEfficiency] = useState(defaultEfficiency.toString())
+  const [depreciationPerKm, setDepreciationPerKm] = useState(defaultDepreciation.toString())
   const [notes, setNotes] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -33,6 +35,7 @@ export default function AddRideModal({
       setDistanceKm(editRide.distance_km?.toString() || '')
       setFuelPrice(editRide.fuel_price?.toString() || defaultFuelPrice.toString())
       setFuelEfficiency(editRide.fuel_efficiency?.toString() || defaultEfficiency.toString())
+      setDepreciationPerKm(editRide.depreciation_per_km?.toString() ?? defaultDepreciation.toString())
       setNotes(editRide.notes || '')
     } else {
       setDate(initialDate || getTodayString())
@@ -41,9 +44,10 @@ export default function AddRideModal({
       setDistanceKm('')
       setFuelPrice(defaultFuelPrice.toString())
       setFuelEfficiency(defaultEfficiency.toString())
+      setDepreciationPerKm(defaultDepreciation.toString())
       setNotes('')
     }
-  }, [editRide, isOpen, initialDate, defaultEfficiency, defaultFuelPrice])
+  }, [editRide, isOpen, initialDate, defaultEfficiency, defaultFuelPrice, defaultDepreciation])
 
   const togglePlatform = (p) => {
     if (platforms.includes(p)) {
@@ -60,9 +64,11 @@ export default function AddRideModal({
   const dist = parseFloat(distanceKm) || 0
   const price = parseFloat(fuelPrice) || 0
   const eff = parseFloat(fuelEfficiency) || 15.0
+  const depRate = parseFloat(depreciationPerKm) || 0
 
   const fuelCost = eff > 0 ? (dist / eff) * price : 0
-  const netIncome = gross - fuelCost
+  const depCost = dist * depRate
+  const netIncome = gross - fuelCost - depCost
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -88,6 +94,7 @@ export default function AddRideModal({
         distance_km: dist,
         fuel_price: price,
         fuel_efficiency: eff,
+        depreciation_per_km: depRate,
         notes: notes.trim(),
       })
       onClose()
@@ -312,12 +319,12 @@ export default function AddRideModal({
             </div>
           </div>
 
-          {/* Fuel Price & Efficiency */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
+          {/* Fuel Price, Efficiency & Depreciation */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
             <div className="form-group">
-              <label className="form-label">
-                <span>ราคาน้ำมัน (บาท/ลิตร)</span>
-                <Fuel size={14} style={{ color: 'var(--rose-500)' }} />
+              <label className="form-label" style={{ fontSize: '0.75rem' }}>
+                <span>ราคาน้ำมัน (บ./ล.)</span>
+                <Fuel size={13} style={{ color: 'var(--rose-500)' }} />
               </label>
               <input
                 type="number"
@@ -332,8 +339,8 @@ export default function AddRideModal({
             </div>
 
             <div className="form-group">
-              <label className="form-label">
-                <span>อัตรากินน้ำมัน (กม./ลิตร)</span>
+              <label className="form-label" style={{ fontSize: '0.75rem' }}>
+                <span>กินน้ำมัน (กม./ล.)</span>
               </label>
               <input
                 type="number"
@@ -344,6 +351,21 @@ export default function AddRideModal({
                 className="form-input"
                 value={fuelEfficiency}
                 onChange={(e) => setFuelEfficiency(e.target.value)}
+              />
+            </div>
+
+            <div className="form-group">
+              <label className="form-label" style={{ fontSize: '0.75rem' }}>
+                <span>ค่าเสื่อม (บ./กม.)</span>
+              </label>
+              <input
+                type="number"
+                step="0.05"
+                min="0"
+                placeholder="0.00"
+                className="form-input"
+                value={depreciationPerKm}
+                onChange={(e) => setDepreciationPerKm(e.target.value)}
               />
             </div>
           </div>
@@ -366,17 +388,23 @@ export default function AddRideModal({
           {/* Real-time Calculation Preview Card */}
           <div className="calc-preview-card">
             <div className="calc-preview-row">
-              <span>สูตรคำนวณค่าน้ำมัน:</span>
-              <span>({dist || 0} กม. ÷ {eff} กม./ลิตร) × {price} บ.</span>
-            </div>
-            <div className="calc-preview-row">
-              <span>ค่าน้ำมันรอบนี้:</span>
+              <span>ค่าน้ำมัน ({dist || 0} กม. ÷ {eff} กม./ล. × {price} บ.):</span>
               <span style={{ color: '#fda4af', fontWeight: 600 }}>
                 -฿{fuelCost.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>
             </div>
+
+            {depRate > 0 && (
+              <div className="calc-preview-row">
+                <span>ค่าเสื่อมรถ ({dist || 0} กม. × {depRate} บ./กม.):</span>
+                <span style={{ color: '#fed7aa', fontWeight: 600 }}>
+                  -฿{depCost.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </span>
+              </div>
+            )}
+
             <div className="calc-preview-row final">
-              <span>กำไรสุทธิรอบนี้ (Net Profit):</span>
+              <span>กำไรสุทธิรอบนี้ (หักน้ำมัน{depRate > 0 ? ' + ค่าเสื่อม' : ''}):</span>
               <span className="net-val">
                 ฿{netIncome.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
               </span>

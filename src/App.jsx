@@ -20,6 +20,7 @@ export default function App() {
   const [settings, setSettings] = useState({
     fuel_efficiency: 15.0,
     last_fuel_price: 38.0,
+    depreciation_per_km: 0.0,
     monthly_goal: 8000.0,
   })
 
@@ -66,6 +67,7 @@ export default function App() {
           user_id: userId,
           fuel_efficiency: 15.0,
           last_fuel_price: 38.0,
+          depreciation_per_km: 0.0,
           monthly_goal: 8000.0,
         }
         await supabase.from('driver_settings').insert([defaultSet])
@@ -87,7 +89,28 @@ export default function App() {
         .order('created_at', { ascending: false })
 
       if (error) throw error
-      setRides(data || [])
+
+      // Calculate/normalize depreciation and net_income so calculations are 100% accurate
+      const processedRides = (data || []).map((r) => {
+        const dist = Number(r.distance_km || 0)
+        const depRate = Number(r.depreciation_per_km || 0)
+        const depCost = Number((dist * depRate).toFixed(2))
+        const eff = Number(r.fuel_efficiency) || 15
+        const price = Number(r.fuel_price) || 0
+        const fuelCost = r.fuel_cost != null ? Number(r.fuel_cost) : Number(((dist / eff) * price).toFixed(2))
+        const gross = Number(r.gross_income || 0)
+        const net = Number((gross - fuelCost - depCost).toFixed(2))
+
+        return {
+          ...r,
+          depreciation_per_km: depRate,
+          depreciation_cost: depCost,
+          fuel_cost: fuelCost,
+          net_income: net,
+        }
+      })
+
+      setRides(processedRides)
     } catch (err) {
       console.error('Error fetching ride logs:', err)
     }
@@ -106,9 +129,6 @@ export default function App() {
     const userId = session?.user?.id
     if (!userId) return
 
-    const fuel_cost = Number(((rideData.distance_km / rideData.fuel_efficiency) * rideData.fuel_price).toFixed(2))
-    const net_income = Number((rideData.gross_income - fuel_cost).toFixed(2))
-
     const payload = {
       user_id: userId,
       log_date: rideData.log_date,
@@ -117,6 +137,7 @@ export default function App() {
       distance_km: rideData.distance_km,
       fuel_price: rideData.fuel_price,
       fuel_efficiency: rideData.fuel_efficiency,
+      depreciation_per_km: rideData.depreciation_per_km || 0,
       notes: rideData.notes,
     }
 
@@ -177,6 +198,7 @@ export default function App() {
         user_id: userId,
         fuel_efficiency: newSettings.fuel_efficiency,
         last_fuel_price: newSettings.last_fuel_price,
+        depreciation_per_km: newSettings.depreciation_per_km || 0,
         monthly_goal: newSettings.monthly_goal,
         updated_at: new Date().toISOString(),
       })
@@ -301,6 +323,7 @@ export default function App() {
         onSave={handleSaveRide}
         defaultEfficiency={settings.fuel_efficiency}
         defaultFuelPrice={settings.last_fuel_price}
+        defaultDepreciation={settings.depreciation_per_km || 0}
         initialDate={selectedDate}
         editRide={editingRide}
       />

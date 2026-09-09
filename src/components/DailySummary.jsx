@@ -20,6 +20,7 @@ export default function DailySummary({
   const totalGross = ridesForDay.reduce((sum, r) => sum + Number(r.gross_income || 0), 0)
   const totalDistance = ridesForDay.reduce((sum, r) => sum + Number(r.distance_km || 0), 0)
   const totalFuelCost = ridesForDay.reduce((sum, r) => sum + Number(r.fuel_cost || 0), 0)
+  const totalDepCost = ridesForDay.reduce((sum, r) => sum + (Number(r.depreciation_per_km || 0) * Number(r.distance_km || 0)), 0)
   const totalNet = ridesForDay.reduce((sum, r) => sum + Number(r.net_income || 0), 0)
 
   // Cost per km
@@ -90,7 +91,9 @@ export default function DailySummary({
             <span>฿{totalNet.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            {totalGross > 0 ? `เหลือ ${( (totalNet / totalGross) * 100 ).toFixed(0)}% ของรายได้` : 'ยังไม่มีรายการ'}
+            {totalGross > 0 
+              ? `เหลือ ${( (totalNet / totalGross) * 100 ).toFixed(0)}% ${totalDepCost > 0 ? '(หักน้ำมัน+ค่าเสื่อม)' : 'ของรายได้'}` 
+              : 'ยังไม่มีรายการ'}
           </div>
         </div>
 
@@ -119,6 +122,7 @@ export default function DailySummary({
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
             เฉลี่ย ฿{costPerKm}/กม.
+            {totalDepCost > 0 && ` • สึกหรอ ฿${totalDepCost.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`}
           </div>
         </div>
 

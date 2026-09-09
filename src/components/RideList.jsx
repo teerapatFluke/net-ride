@@ -97,11 +97,20 @@ export default function RideList({ rides, onEdit, onDelete }) {
                   -฿{Number(ride.fuel_cost).toLocaleString('th-TH', { minimumFractionDigits: 2 })}
                 </div>
               </div>
+
+              {Number(ride.depreciation_per_km) > 0 && (
+                <div>
+                  <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>ค่าเสื่อม (@{ride.depreciation_per_km}บ./กม.)</div>
+                  <div style={{ fontWeight: 600, color: '#fed7aa', fontSize: '0.9rem' }}>
+                    -฿{(Number(ride.depreciation_per_km) * Number(ride.distance_km)).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="ride-item-footer">
               <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                กำไรสุทธิรอบนี้:
+                กำไรสุทธิรอบนี้{Number(ride.depreciation_per_km) > 0 ? ' (หักน้ำมัน+ค่าเสื่อม)' : ''}:
               </span>
               <span className="ride-net-badge">
                 ฿{Number(ride.net_income).toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}

@@ -656,7 +656,7 @@ body {
 
 .ride-item-body {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(85px, 1fr));
   gap: 8px;
   font-size: 0.8rem;
   color: var(--text-secondary);

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { X, Settings, Target, Fuel, Gauge, ShieldCheck, Check } from 'lucide-react'
+import { X, Settings, Target, Fuel, Gauge, ShieldCheck, Check, Wrench } from 'lucide-react'
 import { OWNER_EMAIL, OWNER_UID } from '../lib/supabase'
 
 export default function SettingsModal({
@@ -13,6 +13,7 @@ export default function SettingsModal({
 
   const [fuelEfficiency, setFuelEfficiency] = useState(settings?.fuel_efficiency?.toString() || '15')
   const [lastFuelPrice, setLastFuelPrice] = useState(settings?.last_fuel_price?.toString() || '38')
+  const [depreciationPerKm, setDepreciationPerKm] = useState(settings?.depreciation_per_km?.toString() || '0')
   const [monthlyGoal, setMonthlyGoal] = useState(settings?.monthly_goal?.toString() || '8000')
   const [loading, setLoading] = useState(false)
   const [savedSuccess, setSavedSuccess] = useState(false)
@@ -21,6 +22,7 @@ export default function SettingsModal({
     if (settings) {
       setFuelEfficiency(settings.fuel_efficiency?.toString() || '15')
       setLastFuelPrice(settings.last_fuel_price?.toString() || '38')
+      setDepreciationPerKm(settings.depreciation_per_km?.toString() || '0')
       setMonthlyGoal(settings.monthly_goal?.toString() || '8000')
     }
   }, [settings, isOpen])
@@ -33,6 +35,7 @@ export default function SettingsModal({
       await onSave({
         fuel_efficiency: parseFloat(fuelEfficiency) || 15,
         last_fuel_price: parseFloat(lastFuelPrice) || 38,
+        depreciation_per_km: parseFloat(depreciationPerKm) || 0,
         monthly_goal: parseFloat(monthlyGoal) || 8000,
       })
       setSavedSuccess(true)
@@ -121,6 +124,27 @@ export default function SettingsModal({
               onChange={(e) => setLastFuelPrice(e.target.value)}
               placeholder="เช่น 38.00"
             />
+          </div>
+
+          {/* Vehicle Depreciation per km */}
+          <div className="form-group">
+            <label className="form-label">
+              <span>ค่าเสื่อมรถ / ค่าสึกหรอต่อกิโลเมตร (บาท/กม.)</span>
+              <Wrench size={16} style={{ color: '#f97316' }} />
+            </label>
+            <input
+              type="number"
+              step="0.05"
+              min="0"
+              required
+              className="form-input"
+              value={depreciationPerKm}
+              onChange={(e) => setDepreciationPerKm(e.target.value)}
+              placeholder="เช่น 0.50 หรือ 1.00 (ใส่ 0 หากไม่ต้องการหัก)"
+            />
+            <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>
+              สำหรับหักต้นทุนสึกหรอ เช่น ค่ายาง, ถ่ายน้ำมันเครื่อง, เบรก และค่าเสื่อมสภาพตามระยะทางจริง (ใส่ 0 หากไม่หัก)
+            </span>
           </div>
 
           {/* Monthly Income Goal */}

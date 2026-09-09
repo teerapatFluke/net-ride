@@ -84,3 +84,16 @@ WITH CHECK (
 INSERT INTO public.driver_settings (user_id, fuel_efficiency, last_fuel_price, monthly_goal)
 VALUES ('ee68b45b-f854-4fcc-9af6-f9e7a707afb5', 15.00, 38.00, 8000.00)
 ON CONFLICT (user_id) DO NOTHING;
+
+-- ==============================================================================
+-- 6. MIGRATION FOR DEPRECIATION / MAINTENANCE COST (ค่าเสื่อม/ค่าสึกหรอต่อกิโล)
+-- รันคำสั่งนี้ใน Supabase SQL Editor หากเคยสร้างตารางไปแล้ว
+-- ==============================================================================
+ALTER TABLE public.driver_settings ADD COLUMN IF NOT EXISTS depreciation_per_km NUMERIC(6, 2) NOT NULL DEFAULT 0.00;
+ALTER TABLE public.ride_logs ADD COLUMN IF NOT EXISTS depreciation_per_km NUMERIC(6, 2) NOT NULL DEFAULT 0.00;
+
+-- อัปเดต generated column net_income ให้หักค่าเสื่อมต่อกิโลเมตรด้วย
+ALTER TABLE public.ride_logs DROP COLUMN IF EXISTS net_income;
+ALTER TABLE public.ride_logs ADD COLUMN net_income NUMERIC(10, 2) GENERATED ALWAYS AS (
+    ROUND(gross_income - ((distance_km / NULLIF(fuel_efficiency, 0)) * fuel_price) - (distance_km * COALESCE(depreciation_per_km, 0)), 2)
+) STORED;
