@@ -152,9 +152,11 @@ export default function AddRideModal({
                 className={`platform-btn ${platforms.includes('Grab') ? 'active grab' : ''}`}
                 onClick={() => togglePlatform('Grab')}
                 style={{
-                  padding: '10px 4px',
-                  flexDirection: 'column',
-                  gap: '4px',
+                  height: '50px',
+                  padding: '0 6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   position: 'relative',
                   borderWidth: platforms.includes('Grab') ? '1.5px' : '1px'
                 }}
@@ -171,8 +173,11 @@ export default function AddRideModal({
                     ✓
                   </span>
                 )}
-                <PlatformBadge platform="Grab" size="md" showText={false} />
-                <span style={{ fontSize: '0.76rem', fontWeight: 800 }}>GRAB</span>
+                <img
+                  src="./platforms/grab.svg"
+                  alt="Grab"
+                  style={{ height: '23px', width: 'auto', maxWidth: '85%', objectFit: 'contain', display: 'block' }}
+                />
               </button>
 
               {/* BOLT */}
@@ -181,9 +186,11 @@ export default function AddRideModal({
                 className={`platform-btn ${platforms.includes('Bolt') ? 'active bolt' : ''}`}
                 onClick={() => togglePlatform('Bolt')}
                 style={{
-                  padding: '10px 4px',
-                  flexDirection: 'column',
-                  gap: '4px',
+                  height: '50px',
+                  padding: '0 6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
                   position: 'relative',
                   borderWidth: platforms.includes('Bolt') ? '1.5px' : '1px'
                 }}
@@ -200,8 +207,11 @@ export default function AddRideModal({
                     ✓
                   </span>
                 )}
-                <PlatformBadge platform="Bolt" size="md" showText={false} />
-                <span style={{ fontSize: '0.76rem', fontWeight: 800 }}>BOLT</span>
+                <img
+                  src="./platforms/bolt.svg"
+                  alt="Bolt"
+                  style={{ height: '22px', width: 'auto', maxWidth: '85%', objectFit: 'contain', display: 'block' }}
+                />
               </button>
 
               {/* LINE MAN */}
@@ -210,12 +220,13 @@ export default function AddRideModal({
                 className={`platform-btn ${platforms.includes('Line Man') ? 'active lineman' : ''}`}
                 onClick={() => togglePlatform('Line Man')}
                 style={{
-                  padding: '10px 4px',
-                  flexDirection: 'column',
-                  gap: '4px',
+                  height: '50px',
+                  padding: '0 6px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '6px',
                   position: 'relative',
-                  borderColor: platforms.includes('Line Man') ? '#06c755' : undefined,
-                  background: platforms.includes('Line Man') ? 'rgba(6, 199, 85, 0.18)' : undefined,
                   borderWidth: platforms.includes('Line Man') ? '1.5px' : '1px'
                 }}
               >
@@ -231,8 +242,12 @@ export default function AddRideModal({
                     ✓
                   </span>
                 )}
-                <PlatformBadge platform="Line Man" size="md" showText={false} />
-                <span style={{ fontSize: '0.76rem', fontWeight: 800 }}>LINE MAN</span>
+                <img
+                  src="./platforms/line.svg"
+                  alt="LINE MAN"
+                  style={{ height: '20px', width: '20px', borderRadius: '4px', display: 'block', flexShrink: 0 }}
+                />
+                <span style={{ fontSize: '0.8rem', fontWeight: 800, whiteSpace: 'nowrap' }}>LINE MAN</span>
               </button>
             </div>
 

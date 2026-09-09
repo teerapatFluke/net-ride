@@ -651,6 +651,13 @@ body {
   box-shadow: 0 0 15px -3px rgba(52, 209, 134, 0.3);
 }
 
+.platform-btn.active.lineman {
+  background: rgba(6, 199, 85, 0.15);
+  border-color: #06c755;
+  color: #22c55e;
+  box-shadow: 0 0 15px -3px rgba(6, 199, 85, 0.3);
+}
+
 /* Live Calculation Preview in Form */
 .calc-preview-card {
   background: linear-gradient(135deg, rgba(16, 185, 129, 0.1) 0%, rgba(245, 158, 11, 0.05) 100%);
