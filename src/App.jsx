@@ -33,6 +33,14 @@ export default function App() {
     localStorage.setItem('netride_deduct_depreciation', val ? 'true' : 'false')
   }
 
+  // Compute display rides with reactive net_income based on toggle (MUST BE AT TOP LEVEL BEFORE RETURNS)
+  const displayRides = useMemo(() => {
+    return rides.map((r) => ({
+      ...r,
+      net_income: deductDepreciation ? r.net_income_with_dep : r.net_income_without_dep,
+    }))
+  }, [rides, deductDepreciation])
+
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
   const [isSettingsOpen, setIsSettingsOpen] = useState(false)
@@ -269,14 +277,6 @@ export default function App() {
       </div>
     )
   }
-
-  // Compute display rides with reactive net_income based on toggle
-  const displayRides = useMemo(() => {
-    return rides.map((r) => ({
-      ...r,
-      net_income: deductDepreciation ? r.net_income_with_dep : r.net_income_without_dep,
-    }))
-  }, [rides, deductDepreciation])
 
   // Filter rides for selected day
   const ridesForDay = displayRides.filter((r) => r.log_date === selectedDate)
