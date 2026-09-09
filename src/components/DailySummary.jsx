@@ -1,35 +1,18 @@
 import React from 'react'
 import { ChevronLeft, ChevronRight, Calendar, DollarSign, Fuel, Navigation, TrendingUp } from 'lucide-react'
+import { formatThaiDate, shiftDateString, getTodayString } from '../lib/dateUtils'
 
 export default function DailySummary({
   selectedDate,
   onDateChange,
   ridesForDay,
 }) {
-  // Format Date for Thai Locale
-  const formatThaiDate = (dateString) => {
-    try {
-      const date = new Date(dateString + 'T00:00:00')
-      return date.toLocaleDateString('th-TH', {
-        weekday: 'short',
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric',
-      })
-    } catch {
-      return dateString
-    }
-  }
-
   const isToday = () => {
-    const todayStr = new Date().toISOString().split('T')[0]
-    return selectedDate === todayStr
+    return selectedDate === getTodayString()
   }
 
   const changeDay = (offset) => {
-    const d = new Date(selectedDate + 'T00:00:00')
-    d.setDate(d.getDate() + offset)
-    onDateChange(d.toISOString().split('T')[0])
+    onDateChange(shiftDateString(selectedDate, offset))
   }
 
   // Aggregate sums
@@ -60,7 +43,7 @@ export default function DailySummary({
             <span className="today-badge">วันนี้</span>
           ) : (
             <button
-              onClick={() => onDateChange(new Date().toISOString().split('T')[0])}
+              onClick={() => onDateChange(getTodayString())}
               style={{
                 background: 'transparent',
                 border: 'none',

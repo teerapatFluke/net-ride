@@ -9,11 +9,12 @@ import SettingsModal from './components/SettingsModal'
 import ExportModal from './components/ExportModal'
 import Auth from './components/Auth'
 import { Plus, ShieldAlert } from 'lucide-react'
+import { getTodayString } from './lib/dateUtils'
 
 export default function App() {
   const [session, setSession] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [selectedDate, setSelectedDate] = useState(() => new Date().toISOString().split('T')[0])
+  const [selectedDate, setSelectedDate] = useState(() => getTodayString())
   const [rides, setRides] = useState([])
   const [settings, setSettings] = useState({
     fuel_efficiency: 15.0,

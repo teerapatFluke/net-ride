@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { X, PlusCircle, Check, Car, Fuel, Navigation, DollarSign, FileText } from 'lucide-react'
+import { getTodayString } from '../lib/dateUtils'
 
 export default function AddRideModal({
   isOpen,
@@ -12,7 +13,7 @@ export default function AddRideModal({
 }) {
   if (!isOpen) return null
 
-  const [date, setDate] = useState(initialDate || new Date().toISOString().split('T')[0])
+  const [date, setDate] = useState(initialDate || getTodayString())
   const [platform, setPlatform] = useState('Grab')
   const [grossIncome, setGrossIncome] = useState('')
   const [distanceKm, setDistanceKm] = useState('')
@@ -33,7 +34,7 @@ export default function AddRideModal({
       setFuelEfficiency(editRide.fuel_efficiency?.toString() || defaultEfficiency.toString())
       setNotes(editRide.notes || '')
     } else {
-      setDate(initialDate || new Date().toISOString().split('T')[0])
+      setDate(initialDate || getTodayString())
       setPlatform('Grab')
       setGrossIncome('')
       setDistanceKm('')
