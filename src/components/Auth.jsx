@@ -23,6 +23,14 @@ export default function Auth({ onAuthSuccess }) {
           password,
         })
         if (authError) throw authError
+        if (data?.session) {
+          try {
+            localStorage.setItem('netride_custom_session', JSON.stringify(data.session))
+            localStorage.setItem('netride_saved_creds', JSON.stringify({ email: email.trim(), password }))
+          } catch (e) {
+            console.warn('LocalStorage save failed', e)
+          }
+        }
         if (onAuthSuccess) onAuthSuccess(data.session)
       } else {
         // Magic link
@@ -33,6 +41,9 @@ export default function Auth({ onAuthSuccess }) {
           },
         })
         if (otpError) throw otpError
+        try {
+          localStorage.setItem('netride_saved_email', email.trim())
+        } catch (e) {}
         setMessage('ส่งลิงก์เข้าสู่ระบบไปที่อีเมลของคุณแล้ว! กรุณาเช็คกล่องข้อความหรือสแปม')
       }
     } catch (err) {

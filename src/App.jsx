@@ -13,8 +13,21 @@ import { Plus, ShieldAlert } from 'lucide-react'
 import { getTodayString } from './lib/dateUtils'
 
 export default function App() {
-  const [session, setSession] = useState(null)
-  const [loading, setLoading] = useState(true)
+  const [session, setSession] = useState(() => {
+    try {
+      const saved = localStorage.getItem('netride_custom_session')
+      return saved ? JSON.parse(saved) : null
+    } catch {
+      return null
+    }
+  })
+  const [loading, setLoading] = useState(() => {
+    try {
+      return !localStorage.getItem('netride_custom_session')
+    } catch {
+      return true
+    }
+  })
   const [selectedDate, setSelectedDate] = useState(() => getTodayString())
   const [rides, setRides] = useState([])
   const [deductDepreciation, setDeductDepreciation] = useState(() => {
@@ -48,17 +61,73 @@ export default function App() {
   const [isCalendarOpen, setIsCalendarOpen] = useState(false)
   const [editingRide, setEditingRide] = useState(null)
 
-  // 1. Check & listen for Auth state
+  // 1. Check & restore Auth state from LocalStorage & Supabase
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
-      setLoading(false)
-    })
+    const restoreSession = async () => {
+      try {
+        const { data: { session: activeSession } } = await supabase.auth.getSession()
+
+        if (activeSession) {
+          setSession(activeSession)
+          localStorage.setItem('netride_custom_session', JSON.stringify(activeSession))
+        } else {
+          // Check cached session with refresh token
+          const cached = localStorage.getItem('netride_custom_session')
+          if (cached) {
+            try {
+              const parsed = JSON.parse(cached)
+              if (parsed?.refresh_token) {
+                const { data: refreshed } = await supabase.auth.setSession({
+                  access_token: parsed.access_token,
+                  refresh_token: parsed.refresh_token,
+                })
+                if (refreshed?.session) {
+                  setSession(refreshed.session)
+                  localStorage.setItem('netride_custom_session', JSON.stringify(refreshed.session))
+                }
+              }
+            } catch (e) {
+              console.warn('Refresh session error:', e)
+            }
+          }
+
+          // Fallback auto-relogin with saved credentials
+          const savedCreds = localStorage.getItem('netride_saved_creds')
+          if (savedCreds) {
+            try {
+              const { email, password } = JSON.parse(savedCreds)
+              if (email && password) {
+                const { data: loginData } = await supabase.auth.signInWithPassword({ email, password })
+                if (loginData?.session) {
+                  setSession(loginData.session)
+                  localStorage.setItem('netride_custom_session', JSON.stringify(loginData.session))
+                }
+              }
+            } catch (e) {
+              console.warn('Auto-login fallback error:', e)
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Session restore error:', err)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    restoreSession()
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session)
+    } = supabase.auth.onAuthStateChange((_event, newSession) => {
+      if (newSession) {
+        setSession(newSession)
+        localStorage.setItem('netride_custom_session', JSON.stringify(newSession))
+      } else if (_event === 'SIGNED_OUT') {
+        setSession(null)
+        localStorage.removeItem('netride_custom_session')
+        localStorage.removeItem('netride_saved_creds')
+      }
       setLoading(false)
     })
 
@@ -230,7 +299,12 @@ export default function App() {
   // Sign out
   const handleSignOut = async () => {
     if (window.confirm('คุณต้องการออกจากระบบหรือไม่?')) {
+      try {
+        localStorage.removeItem('netride_custom_session')
+        localStorage.removeItem('netride_saved_creds')
+      } catch (e) {}
       await supabase.auth.signOut()
+      setSession(null)
     }
   }
 
