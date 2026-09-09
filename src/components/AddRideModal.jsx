@@ -290,10 +290,10 @@ export default function AddRideModal({
               </label>
               <input
                 type="number"
-                step="0.5"
+                step="any"
                 min="0"
                 required
-                placeholder="เช่น 550"
+                placeholder="เช่น 550 หรือ 802.16"
                 className="form-input"
                 value={grossIncome}
                 onChange={(e) => setGrossIncome(e.target.value)}
@@ -308,10 +308,10 @@ export default function AddRideModal({
               </label>
               <input
                 type="number"
-                step="0.1"
+                step="any"
                 min="0"
                 required
-                placeholder="เช่น 35"
+                placeholder="เช่น 35 หรือ 156.3"
                 className="form-input"
                 value={distanceKm}
                 onChange={(e) => setDistanceKm(e.target.value)}
@@ -328,7 +328,7 @@ export default function AddRideModal({
               </label>
               <input
                 type="number"
-                step="0.01"
+                step="any"
                 min="1"
                 required
                 placeholder="38.00"
@@ -344,7 +344,7 @@ export default function AddRideModal({
               </label>
               <input
                 type="number"
-                step="0.1"
+                step="any"
                 min="1"
                 required
                 placeholder="15.0"
@@ -360,7 +360,7 @@ export default function AddRideModal({
               </label>
               <input
                 type="number"
-                step="0.05"
+                step="any"
                 min="0"
                 placeholder="0.00"
                 className="form-input"

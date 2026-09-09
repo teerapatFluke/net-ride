@@ -95,7 +95,7 @@ export default function SettingsModal({
             </label>
             <input
               type="number"
-              step="0.1"
+              step="any"
               min="1"
               required
               className="form-input"
@@ -116,7 +116,7 @@ export default function SettingsModal({
             </label>
             <input
               type="number"
-              step="0.01"
+              step="any"
               min="1"
               required
               className="form-input"
@@ -134,7 +134,7 @@ export default function SettingsModal({
             </label>
             <input
               type="number"
-              step="0.05"
+              step="any"
               min="0"
               required
               className="form-input"
@@ -155,7 +155,7 @@ export default function SettingsModal({
             </label>
             <input
               type="number"
-              step="100"
+              step="any"
               min="1000"
               required
               className="form-input"
