@@ -81,24 +81,24 @@ export default function DailySummary({
         </button>
       </div>
 
-      {/* Mode Switcher: Real Net (with Depreciation) vs Cash */}
+      {/* Mode Switcher: Real Net vs Cash */}
       <div className="depreciation-toggle-container">
         <div className="segmented-control">
           <button
             type="button"
             className={`segmented-btn ${deductDepreciation ? 'active' : ''}`}
             onClick={() => onToggleDepreciation?.(true)}
-            title="หักค่าน้ำมันและค่าเสื่อม/สึกหรอรถตามระยะทาง (กำไรสุทธิแท้จริง)"
+            title="หักค่าน้ำมันและค่าเสื่อม/สึกหรอรถตามระยะทาง"
           >
-            <span>🔧 หักค่าเสื่อมรถ (สุทธิแท้จริง)</span>
+            <span>🔧 หักค่าเสื่อมรถ</span>
           </button>
           <button
             type="button"
             className={`segmented-btn ${!deductDepreciation ? 'active cash' : ''}`}
             onClick={() => onToggleDepreciation?.(false)}
-            title="คิดเฉพาะค่าน้ำมัน ไม่หักค่าเสื่อมรถ (เงินสดเข้ากระเป๋าจริง)"
+            title="คิดเฉพาะค่าน้ำมัน ไม่หักค่าเสื่อมรถ"
           >
-            <span>💵 ไม่หักค่าเสื่อม (เงินสด)</span>
+            <span>💵 ไม่หักค่าเสื่อม</span>
           </button>
         </div>
       </div>

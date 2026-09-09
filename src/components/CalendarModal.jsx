@@ -95,7 +95,7 @@ export default function CalendarModal({
               border: `1px solid ${deductDepreciation ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
               fontWeight: 600
             }}>
-              {deductDepreciation ? '🔧 หักค่าเสื่อม' : '💵 ไม่หักเสื่อม (เงินสด)'}
+              {deductDepreciation ? '🔧 หักค่าเสื่อม' : '💵 ไม่หักค่าเสื่อม'}
             </span>
           </div>
           <button className="btn-icon" onClick={onClose}>
