@@ -16,7 +16,7 @@ export default function AddRideModal({
   if (!isOpen) return null
 
   const [date, setDate] = useState(initialDate || getTodayString())
-  const [platforms, setPlatforms] = useState(['Grab'])
+  const [platform, setPlatform] = useState('Grab')
   const [grossIncome, setGrossIncome] = useState('')
   const [distanceKm, setDistanceKm] = useState('')
   const [fuelPrice, setFuelPrice] = useState(defaultFuelPrice.toString())
@@ -30,7 +30,7 @@ export default function AddRideModal({
   useEffect(() => {
     if (editRide) {
       setDate(editRide.log_date || initialDate)
-      setPlatforms(editRide.platform ? editRide.platform.split(',').map(s => s.trim()).filter(Boolean) : ['Grab'])
+      setPlatform(editRide.platform || 'Grab')
       setGrossIncome(editRide.gross_income?.toString() || '')
       setDistanceKm(editRide.distance_km?.toString() || '')
       setFuelPrice(editRide.fuel_price?.toString() || defaultFuelPrice.toString())
@@ -39,7 +39,7 @@ export default function AddRideModal({
       setNotes(editRide.notes || '')
     } else {
       setDate(initialDate || getTodayString())
-      setPlatforms(['Grab'])
+      setPlatform('Grab')
       setGrossIncome('')
       setDistanceKm('')
       setFuelPrice(defaultFuelPrice.toString())
@@ -48,16 +48,6 @@ export default function AddRideModal({
       setNotes('')
     }
   }, [editRide, isOpen, initialDate, defaultEfficiency, defaultFuelPrice, defaultDepreciation])
-
-  const togglePlatform = (p) => {
-    if (platforms.includes(p)) {
-      if (platforms.length > 1) {
-        setPlatforms(platforms.filter(item => item !== p))
-      }
-    } else {
-      setPlatforms([...platforms, p])
-    }
-  }
 
   // Real-time calculation
   const gross = parseFloat(grossIncome) || 0
@@ -89,7 +79,7 @@ export default function AddRideModal({
       await onSave({
         id: editRide?.id,
         log_date: date,
-        platform: platforms.join(', '),
+        platform: platform,
         gross_income: gross,
         distance_km: dist,
         fuel_price: price,
@@ -135,13 +125,10 @@ export default function AddRideModal({
         )}
 
         <form onSubmit={handleSubmit}>
-          {/* Platform Selector Buttons (Multiple Select) */}
+          {/* Platform Selector Buttons (Single Select) */}
           <div className="form-group">
             <label className="form-label">
-              <span>เลือกแพลตฟอร์ม (เลือกได้มากกว่า 1 ค่าย)</span>
-              <span style={{ fontSize: '0.72rem', color: 'var(--emerald-400)', fontWeight: 600 }}>
-                เลือกแล้ว {platforms.length} ค่าย {platforms.length > 1 && `(${platforms.join(' + ')})`}
-              </span>
+              <span>เลือกแพลตฟอร์ม</span>
             </label>
 
             {/* Top 3 Platforms: Grab, Bolt, Line Man */}
@@ -149,8 +136,8 @@ export default function AddRideModal({
               {/* GRAB */}
               <button
                 type="button"
-                className={`platform-btn ${platforms.includes('Grab') ? 'active grab' : ''}`}
-                onClick={() => togglePlatform('Grab')}
+                className={`platform-btn ${platform === 'Grab' ? 'active grab' : ''}`}
+                onClick={() => setPlatform('Grab')}
                 style={{
                   height: '50px',
                   padding: '0 6px',
@@ -158,10 +145,10 @@ export default function AddRideModal({
                   alignItems: 'center',
                   justifyContent: 'center',
                   position: 'relative',
-                  borderWidth: platforms.includes('Grab') ? '1.5px' : '1px'
+                  borderWidth: platform === 'Grab' ? '1.5px' : '1px'
                 }}
               >
-                {platforms.includes('Grab') && (
+                {platform === 'Grab' && (
                   <span style={{
                     position: 'absolute',
                     top: '4px',
@@ -183,8 +170,8 @@ export default function AddRideModal({
               {/* BOLT */}
               <button
                 type="button"
-                className={`platform-btn ${platforms.includes('Bolt') ? 'active bolt' : ''}`}
-                onClick={() => togglePlatform('Bolt')}
+                className={`platform-btn ${platform === 'Bolt' ? 'active bolt' : ''}`}
+                onClick={() => setPlatform('Bolt')}
                 style={{
                   height: '50px',
                   padding: '0 6px',
@@ -192,10 +179,10 @@ export default function AddRideModal({
                   alignItems: 'center',
                   justifyContent: 'center',
                   position: 'relative',
-                  borderWidth: platforms.includes('Bolt') ? '1.5px' : '1px'
+                  borderWidth: platform === 'Bolt' ? '1.5px' : '1px'
                 }}
               >
-                {platforms.includes('Bolt') && (
+                {platform === 'Bolt' && (
                   <span style={{
                     position: 'absolute',
                     top: '4px',
@@ -217,8 +204,8 @@ export default function AddRideModal({
               {/* LINE MAN */}
               <button
                 type="button"
-                className={`platform-btn ${platforms.includes('Line Man') ? 'active lineman' : ''}`}
-                onClick={() => togglePlatform('Line Man')}
+                className={`platform-btn ${platform === 'Line Man' ? 'active lineman' : ''}`}
+                onClick={() => setPlatform('Line Man')}
                 style={{
                   height: '50px',
                   padding: '0 6px',
@@ -227,10 +214,10 @@ export default function AddRideModal({
                   justifyContent: 'center',
                   gap: '6px',
                   position: 'relative',
-                  borderWidth: platforms.includes('Line Man') ? '1.5px' : '1px'
+                  borderWidth: platform === 'Line Man' ? '1.5px' : '1px'
                 }}
               >
-                {platforms.includes('Line Man') && (
+                {platform === 'Line Man' && (
                   <span style={{
                     position: 'absolute',
                     top: '4px',
@@ -254,12 +241,12 @@ export default function AddRideModal({
             {/* inDrive & Other options */}
             <div style={{ display: 'flex', gap: '8px' }}>
               {['inDrive', 'Other'].map((p) => {
-                const isSelected = platforms.includes(p)
+                const isSelected = platform === p
                 return (
                   <button
                     key={p}
                     type="button"
-                    onClick={() => togglePlatform(p)}
+                    onClick={() => setPlatform(p)}
                     style={{
                       flex: 1,
                       background: isSelected ? 'rgba(255,255,255,0.18)' : 'rgba(255,255,255,0.04)',
