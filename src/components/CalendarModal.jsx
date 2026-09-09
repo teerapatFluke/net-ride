@@ -8,6 +8,7 @@ export default function CalendarModal({
   selectedDate,
   onSelectDate,
   allRides = [],
+  deductDepreciation,
 }) {
   if (!isOpen) return null
 
@@ -81,9 +82,20 @@ export default function CalendarModal({
       >
         {/* Header */}
         <div className="modal-header" style={{ marginBottom: '14px' }}>
-          <div className="modal-title">
+          <div className="modal-title" style={{ flexWrap: 'wrap', gap: '6px' }}>
             <CalendarIcon size={20} style={{ color: 'var(--emerald-400)' }} />
-            <span>เลือกวันที่ & สรุปรายรับ</span>
+            <span>ปฏิทินสรุปรายได้</span>
+            <span style={{
+              fontSize: '0.68rem',
+              padding: '2px 7px',
+              borderRadius: '999px',
+              background: deductDepreciation ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+              color: deductDepreciation ? 'var(--emerald-400)' : 'var(--gold-500)',
+              border: `1px solid ${deductDepreciation ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
+              fontWeight: 600
+            }}>
+              {deductDepreciation ? '🔧 หักค่าเสื่อม' : '💵 ไม่หักเสื่อม (เงินสด)'}
+            </span>
           </div>
           <button className="btn-icon" onClick={onClose}>
             <X size={18} />

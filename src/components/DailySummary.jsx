@@ -7,6 +7,8 @@ export default function DailySummary({
   onDateChange,
   ridesForDay,
   onOpenCalendar,
+  deductDepreciation,
+  onToggleDepreciation,
 }) {
   const isToday = () => {
     return selectedDate === getTodayString()
@@ -79,21 +81,49 @@ export default function DailySummary({
         </button>
       </div>
 
+      {/* Mode Switcher: Cash vs Real Net (with Depreciation) */}
+      <div className="depreciation-toggle-container">
+        <div className="segmented-control">
+          <button
+            type="button"
+            className={`segmented-btn ${!deductDepreciation ? 'active cash' : ''}`}
+            onClick={() => onToggleDepreciation?.(false)}
+            title="คิดเฉพาะค่าน้ำมัน ไม่หักค่าเสื่อมรถ (เงินสดเข้ากระเป๋าจริง)"
+          >
+            <span>💵 ไม่หักค่าเสื่อม (เงินสด)</span>
+          </button>
+          <button
+            type="button"
+            className={`segmented-btn ${deductDepreciation ? 'active' : ''}`}
+            onClick={() => onToggleDepreciation?.(true)}
+            title="หักค่าน้ำมันและค่าเสื่อม/สึกหรอรถตามระยะทาง (กำไรสุทธิแท้จริง)"
+          >
+            <span>🔧 หักค่าเสื่อมรถ (สุทธิแท้จริง)</span>
+          </button>
+        </div>
+      </div>
+
       {/* Metrics Grid */}
       <div className="metrics-grid">
         {/* Net Income */}
-        <div className="metric-box highlight-net">
+        <div className={`metric-box highlight-net ${!deductDepreciation ? 'highlight-cash' : ''}`}>
           <div className="metric-label">
-            <TrendingUp size={14} style={{ color: 'var(--emerald-400)' }} />
-            <span>กำไรสุทธิ (Net Profit)</span>
+            <TrendingUp size={14} style={{ color: deductDepreciation ? 'var(--emerald-400)' : 'var(--gold-500)' }} />
+            <span>{deductDepreciation ? 'กำไรสุทธิ (หักเสื่อมแล้ว)' : 'กำไรเงินสด (หักแค่น้ำมัน)'}</span>
           </div>
-          <div className="metric-value" style={{ color: 'var(--emerald-400)' }}>
+          <div className="metric-value" style={{ color: deductDepreciation ? 'var(--emerald-400)' : 'var(--gold-500)' }}>
             <span>฿{totalNet.toLocaleString('th-TH', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
           </div>
           <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', marginTop: '4px' }}>
-            {totalGross > 0 
-              ? `เหลือ ${( (totalNet / totalGross) * 100 ).toFixed(0)}% ${totalDepCost > 0 ? '(หักน้ำมัน+ค่าเสื่อม)' : 'ของรายได้'}` 
-              : 'ยังไม่มีรายการ'}
+            {totalGross > 0 ? (
+              deductDepreciation ? (
+                `เหลือ ${((totalNet / totalGross) * 100).toFixed(0)}% (หักน้ำมัน + ค่าเสื่อม ฿${totalDepCost.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })})`
+              ) : (
+                `เหลือ ${((totalNet / totalGross) * 100).toFixed(0)}% ${totalDepCost > 0 ? `(มีค่าเสื่อม ฿${totalDepCost.toLocaleString('th-TH', { minimumFractionDigits: 0, maximumFractionDigits: 0 })} ยังไม่หัก)` : ''}`
+              )
+            ) : (
+              'ยังไม่มีรายการ'
+            )}
           </div>
         </div>
 

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { supabase, isOwner, OWNER_EMAIL, OWNER_UID } from './lib/supabase'
 import Navbar from './components/Navbar'
 import DailySummary from './components/DailySummary'
@@ -17,12 +17,21 @@ export default function App() {
   const [loading, setLoading] = useState(true)
   const [selectedDate, setSelectedDate] = useState(() => getTodayString())
   const [rides, setRides] = useState([])
+  const [deductDepreciation, setDeductDepreciation] = useState(() => {
+    const saved = localStorage.getItem('netride_deduct_depreciation')
+    return saved !== null ? saved === 'true' : true
+  })
   const [settings, setSettings] = useState({
     fuel_efficiency: 15.0,
     last_fuel_price: 38.0,
     depreciation_per_km: 0.0,
     monthly_goal: 8000.0,
   })
+
+  const handleToggleDepreciation = (val) => {
+    setDeductDepreciation(val)
+    localStorage.setItem('netride_deduct_depreciation', val ? 'true' : 'false')
+  }
 
   // Modal states
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -99,14 +108,17 @@ export default function App() {
         const price = Number(r.fuel_price) || 0
         const fuelCost = r.fuel_cost != null ? Number(r.fuel_cost) : Number(((dist / eff) * price).toFixed(2))
         const gross = Number(r.gross_income || 0)
-        const net = Number((gross - fuelCost - depCost).toFixed(2))
+        const netWithDep = Number((gross - fuelCost - depCost).toFixed(2))
+        const netWithoutDep = Number((gross - fuelCost).toFixed(2))
 
         return {
           ...r,
           depreciation_per_km: depRate,
           depreciation_cost: depCost,
           fuel_cost: fuelCost,
-          net_income: net,
+          net_income_with_dep: netWithDep,
+          net_income_without_dep: netWithoutDep,
+          net_income: netWithDep,
         }
       })
 
@@ -258,12 +270,20 @@ export default function App() {
     )
   }
 
+  // Compute display rides with reactive net_income based on toggle
+  const displayRides = useMemo(() => {
+    return rides.map((r) => ({
+      ...r,
+      net_income: deductDepreciation ? r.net_income_with_dep : r.net_income_without_dep,
+    }))
+  }, [rides, deductDepreciation])
+
   // Filter rides for selected day
-  const ridesForDay = rides.filter((r) => r.log_date === selectedDate)
+  const ridesForDay = displayRides.filter((r) => r.log_date === selectedDate)
 
   // Filter rides for current month
   const currentMonthPrefix = selectedDate.slice(0, 7) // YYYY-MM
-  const ridesForMonth = rides.filter((r) => r.log_date?.startsWith(currentMonthPrefix))
+  const ridesForMonth = displayRides.filter((r) => r.log_date?.startsWith(currentMonthPrefix))
 
   return (
     <div className="app-container">
@@ -281,12 +301,15 @@ export default function App() {
         onDateChange={(newDate) => setSelectedDate(newDate)}
         ridesForDay={ridesForDay}
         onOpenCalendar={() => setIsCalendarOpen(true)}
+        deductDepreciation={deductDepreciation}
+        onToggleDepreciation={handleToggleDepreciation}
       />
 
       {/* Monthly Goal Tracker */}
       <MonthlyGoal
         monthlyRides={ridesForMonth}
         monthlyGoal={settings.monthly_goal}
+        deductDepreciation={deductDepreciation}
       />
 
       {/* List of rides today */}
@@ -297,6 +320,7 @@ export default function App() {
           setIsAddModalOpen(true)
         }}
         onDelete={handleDeleteRide}
+        deductDepreciation={deductDepreciation}
       />
 
       {/* Bottom Floating Action Button */}
@@ -335,13 +359,16 @@ export default function App() {
         settings={settings}
         onSave={handleSaveSettings}
         user={session.user}
+        deductDepreciation={deductDepreciation}
+        onToggleDepreciation={handleToggleDepreciation}
       />
 
       {/* Export Modal */}
       <ExportModal
         isOpen={isExportOpen}
         onClose={() => setIsExportOpen(false)}
-        allRides={rides}
+        allRides={displayRides}
+        deductDepreciation={deductDepreciation}
       />
 
       {/* Calendar Modal */}
@@ -350,7 +377,8 @@ export default function App() {
         onClose={() => setIsCalendarOpen(false)}
         selectedDate={selectedDate}
         onSelectDate={(d) => setSelectedDate(d)}
-        allRides={rides}
+        allRides={displayRides}
+        deductDepreciation={deductDepreciation}
       />
     </div>
   )

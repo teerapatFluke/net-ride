@@ -2,7 +2,7 @@ import React, { useEffect } from 'react'
 import { Target, Award, CheckCircle2, TrendingUp } from 'lucide-react'
 import confetti from 'canvas-confetti'
 
-export default function MonthlyGoal({ monthlyRides, monthlyGoal }) {
+export default function MonthlyGoal({ monthlyRides, monthlyGoal, deductDepreciation }) {
   const currentMonthName = new Date().toLocaleDateString('th-TH', { month: 'long', year: 'numeric' })
 
   // Calculate monthly stats
@@ -40,9 +40,20 @@ export default function MonthlyGoal({ monthlyRides, monthlyGoal }) {
   return (
     <section className="glass-card">
       <div className="goal-header">
-        <div className="goal-title">
+        <div className="goal-title" style={{ flexWrap: 'wrap', gap: '6px' }}>
           <Target size={18} style={{ color: 'var(--gold-500)' }} />
-          <span>เป้าหมายรายได้สุทธิ ({currentMonthName})</span>
+          <span>เป้าหมายรายได้ ({currentMonthName})</span>
+          <span style={{
+            fontSize: '0.68rem',
+            padding: '1px 6px',
+            borderRadius: '999px',
+            background: deductDepreciation ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+            color: deductDepreciation ? 'var(--emerald-400)' : 'var(--gold-500)',
+            border: `1px solid ${deductDepreciation ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
+            fontWeight: 600
+          }}>
+            {deductDepreciation ? 'หักค่าเสื่อมรถ' : 'ไม่หักค่าเสื่อม'}
+          </span>
         </div>
         <div className="goal-status">
           {totalMonthlyNet >= goal ? (
