@@ -53,6 +53,7 @@ export default function SettingsModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="mobile-sheet-handle" />
         <div className="modal-header">
           <div className="modal-title">
             <Settings size={22} style={{ color: 'var(--gold-500)' }} />
@@ -95,6 +96,7 @@ export default function SettingsModal({
             </label>
             <input
               type="number"
+              inputMode="decimal"
               step="any"
               min="1"
               required
@@ -116,6 +118,7 @@ export default function SettingsModal({
             </label>
             <input
               type="number"
+              inputMode="decimal"
               step="any"
               min="1"
               required
@@ -134,6 +137,7 @@ export default function SettingsModal({
             </label>
             <input
               type="number"
+              inputMode="decimal"
               step="any"
               min="0"
               required
@@ -155,6 +159,7 @@ export default function SettingsModal({
             </label>
             <input
               type="number"
+              inputMode="numeric"
               step="any"
               min="1000"
               required

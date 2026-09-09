@@ -109,6 +109,7 @@ export default function AddRideModal({
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="mobile-sheet-handle" />
         <div className="modal-header">
           <div className="modal-title">
             <PlusCircle size={22} style={{ color: 'var(--emerald-400)' }} />
@@ -290,6 +291,7 @@ export default function AddRideModal({
               </label>
               <input
                 type="number"
+                inputMode="decimal"
                 step="any"
                 min="0"
                 required
@@ -308,6 +310,7 @@ export default function AddRideModal({
               </label>
               <input
                 type="number"
+                inputMode="decimal"
                 step="any"
                 min="0"
                 required
@@ -328,6 +331,7 @@ export default function AddRideModal({
               </label>
               <input
                 type="number"
+                inputMode="decimal"
                 step="any"
                 min="1"
                 required
@@ -344,6 +348,7 @@ export default function AddRideModal({
               </label>
               <input
                 type="number"
+                inputMode="decimal"
                 step="any"
                 min="1"
                 required
@@ -360,6 +365,7 @@ export default function AddRideModal({
               </label>
               <input
                 type="number"
+                inputMode="decimal"
                 step="any"
                 min="0"
                 placeholder="0.00"

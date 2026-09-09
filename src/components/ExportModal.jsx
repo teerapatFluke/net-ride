@@ -73,6 +73,7 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+        <div className="mobile-sheet-handle" />
         <div className="modal-header">
           <div className="modal-title">
             <FileSpreadsheet size={22} style={{ color: 'var(--emerald-400)' }} />

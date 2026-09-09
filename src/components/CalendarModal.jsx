@@ -80,6 +80,7 @@ export default function CalendarModal({
         onClick={(e) => e.stopPropagation()}
         style={{ maxWidth: '460px', padding: '20px' }}
       >
+        <div className="mobile-sheet-handle" />
         {/* Header */}
         <div className="modal-header" style={{ marginBottom: '14px' }}>
           <div className="modal-title" style={{ flexWrap: 'wrap', gap: '6px' }}>
