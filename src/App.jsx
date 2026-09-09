@@ -369,6 +369,14 @@ export default function App() {
         onSignOut={handleSignOut}
       />
 
+      {/* Monthly Goal Tracker (บนสุด) */}
+      <MonthlyGoal
+        monthlyRides={ridesForMonth}
+        monthlyGoal={settings.monthly_goal}
+        deductDepreciation={deductDepreciation}
+        selectedDate={selectedDate}
+      />
+
       {/* Daily Summary & Date Navigator */}
       <DailySummary
         selectedDate={selectedDate}
@@ -377,14 +385,6 @@ export default function App() {
         onOpenCalendar={() => setIsCalendarOpen(true)}
         deductDepreciation={deductDepreciation}
         onToggleDepreciation={handleToggleDepreciation}
-      />
-
-      {/* Monthly Goal Tracker */}
-      <MonthlyGoal
-        monthlyRides={ridesForMonth}
-        monthlyGoal={settings.monthly_goal}
-        deductDepreciation={deductDepreciation}
-        selectedDate={selectedDate}
       />
 
       {/* List of rides today */}

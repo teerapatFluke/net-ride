@@ -26,14 +26,11 @@ export default function PlatformBadge({ platform, size = 'md', showText = true, 
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '6px',
+          justifyContent: 'center',
           background: 'rgba(0, 177, 79, 0.12)',
           border: '1px solid rgba(0, 177, 79, 0.35)',
-          padding: isLg ? '6px 14px' : isSm ? '2px 8px' : '4px 10px',
+          padding: isLg ? '6px 14px' : isSm ? '3px 10px' : '4px 12px',
           borderRadius: '999px',
-          color: '#38ef7d',
-          fontWeight: 700,
-          fontSize: isLg ? '0.9rem' : isSm ? '0.7rem' : '0.8rem',
         }}
       >
         <img
@@ -41,7 +38,6 @@ export default function PlatformBadge({ platform, size = 'md', showText = true, 
           alt="Grab"
           style={{ height: `${iconHeight}px`, width: 'auto', display: 'block' }}
         />
-        {showText && <span>GRAB</span>}
       </span>
     )
   }
@@ -53,14 +49,11 @@ export default function PlatformBadge({ platform, size = 'md', showText = true, 
         style={{
           display: 'inline-flex',
           alignItems: 'center',
-          gap: '6px',
+          justifyContent: 'center',
           background: 'rgba(52, 209, 134, 0.12)',
           border: '1px solid rgba(52, 209, 134, 0.35)',
-          padding: isLg ? '6px 14px' : isSm ? '2px 8px' : '4px 10px',
+          padding: isLg ? '6px 14px' : isSm ? '3px 10px' : '4px 12px',
           borderRadius: '999px',
-          color: '#34d186',
-          fontWeight: 700,
-          fontSize: isLg ? '0.9rem' : isSm ? '0.7rem' : '0.8rem',
         }}
       >
         <img
@@ -68,7 +61,6 @@ export default function PlatformBadge({ platform, size = 'md', showText = true, 
           alt="Bolt"
           style={{ height: `${iconHeight}px`, width: 'auto', display: 'block' }}
         />
-        {showText && <span>BOLT</span>}
       </span>
     )
   }
