@@ -1,5 +1,6 @@
 import React from 'react'
 import { Edit2, Trash2, Car, Navigation, Fuel, DollarSign, Clock } from 'lucide-react'
+import PlatformBadge from './PlatformBadge'
 
 export default function RideList({ rides, onEdit, onDelete }) {
   if (rides.length === 0) {
@@ -14,12 +15,6 @@ export default function RideList({ rides, onEdit, onDelete }) {
         </p>
       </section>
     )
-  }
-
-  const getPlatformClass = (platform) => {
-    if (platform === 'Grab') return 'grab'
-    if (platform === 'Bolt') return 'bolt'
-    return 'other'
   }
 
   return (
@@ -49,9 +44,7 @@ export default function RideList({ rides, onEdit, onDelete }) {
           <div key={ride.id || index} className="ride-item">
             <div className="ride-item-header">
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span className={`platform-pill ${getPlatformClass(ride.platform)}`}>
-                  {ride.platform}
-                </span>
+                <PlatformBadge platform={ride.platform} size="sm" />
                 {ride.notes && (
                   <span style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', fontStyle: 'italic' }}>
                     "{ride.notes}"

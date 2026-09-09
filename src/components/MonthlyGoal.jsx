@@ -15,10 +15,11 @@ export default function MonthlyGoal({ monthlyRides, monthlyGoal }) {
   const progressPercent = Math.min(Math.round((totalMonthlyNet / goal) * 100), 100)
   const rawPercent = ((totalMonthlyNet / goal) * 100).toFixed(1)
 
-  // Grab vs Bolt breakdowns
+  // Platform breakdowns
   const grabNet = monthlyRides.filter(r => r.platform === 'Grab').reduce((sum, r) => sum + Number(r.net_income || 0), 0)
   const boltNet = monthlyRides.filter(r => r.platform === 'Bolt').reduce((sum, r) => sum + Number(r.net_income || 0), 0)
-  const otherNet = monthlyRides.filter(r => r.platform !== 'Grab' && r.platform !== 'Bolt').reduce((sum, r) => sum + Number(r.net_income || 0), 0)
+  const linemanNet = monthlyRides.filter(r => r.platform === 'Line Man' || r.platform === 'LINE MAN').reduce((sum, r) => sum + Number(r.net_income || 0), 0)
+  const otherNet = monthlyRides.filter(r => !['Grab', 'Bolt', 'Line Man', 'LINE MAN'].includes(r.platform)).reduce((sum, r) => sum + Number(r.net_income || 0), 0)
 
   // Trigger confetti once if reached 100%
   useEffect(() => {
@@ -81,33 +82,42 @@ export default function MonthlyGoal({ monthlyRides, monthlyGoal }) {
       {/* Platform Comparison Row */}
       <div style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(3, 1fr)',
+        gridTemplateColumns: otherNet > 0 ? 'repeat(4, 1fr)' : 'repeat(3, 1fr)',
         gap: '8px',
         marginTop: '16px',
         paddingTop: '14px',
         borderTop: '1px solid var(--border-subtle)',
         textAlign: 'center'
       }}>
-        <div style={{ background: 'rgba(0, 177, 79, 0.08)', padding: '10px 6px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(0, 177, 79, 0.2)' }}>
-          <div style={{ fontSize: '0.72rem', color: '#38ef7d', fontWeight: 700 }}>GRAB สุทธิ</div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#fff', marginTop: '2px' }}>
+        <div style={{ background: 'rgba(0, 177, 79, 0.08)', padding: '10px 4px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(0, 177, 79, 0.2)' }}>
+          <div style={{ fontSize: '0.7rem', color: '#38ef7d', fontWeight: 800 }}>GRAB</div>
+          <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#fff', marginTop: '2px' }}>
             ฿{grabNet.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
           </div>
         </div>
 
-        <div style={{ background: 'rgba(52, 209, 134, 0.08)', padding: '10px 6px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(52, 209, 134, 0.2)' }}>
-          <div style={{ fontSize: '0.72rem', color: '#34d186', fontWeight: 700 }}>BOLT สุทธิ</div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#fff', marginTop: '2px' }}>
+        <div style={{ background: 'rgba(52, 209, 134, 0.08)', padding: '10px 4px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(52, 209, 134, 0.2)' }}>
+          <div style={{ fontSize: '0.7rem', color: '#34d186', fontWeight: 800 }}>BOLT</div>
+          <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#fff', marginTop: '2px' }}>
             ฿{boltNet.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
           </div>
         </div>
 
-        <div style={{ background: 'rgba(255, 255, 255, 0.04)', padding: '10px 6px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
-          <div style={{ fontSize: '0.72rem', color: 'var(--text-secondary)', fontWeight: 700 }}>อื่น ๆ / รวม</div>
-          <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#fff', marginTop: '2px' }}>
-            ฿{otherNet.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
+        <div style={{ background: 'rgba(6, 199, 85, 0.08)', padding: '10px 4px', borderRadius: 'var(--radius-md)', border: '1px solid rgba(6, 199, 85, 0.25)' }}>
+          <div style={{ fontSize: '0.7rem', color: '#22c55e', fontWeight: 800 }}>LINE MAN</div>
+          <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#fff', marginTop: '2px' }}>
+            ฿{linemanNet.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
           </div>
         </div>
+
+        {otherNet > 0 && (
+          <div style={{ background: 'rgba(255, 255, 255, 0.04)', padding: '10px 4px', borderRadius: 'var(--radius-md)', border: '1px solid var(--border-subtle)' }}>
+            <div style={{ fontSize: '0.7rem', color: 'var(--text-secondary)', fontWeight: 800 }}>อื่น ๆ</div>
+            <div style={{ fontSize: '0.92rem', fontWeight: 800, color: '#fff', marginTop: '2px' }}>
+              ฿{otherNet.toLocaleString('th-TH', { maximumFractionDigits: 0 })}
+            </div>
+          </div>
+        )}
       </div>
     </section>
   )

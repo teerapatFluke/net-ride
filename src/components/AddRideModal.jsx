@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { X, PlusCircle, Check, Car, Fuel, Navigation, DollarSign, FileText } from 'lucide-react'
 import { getTodayString } from '../lib/dateUtils'
+import PlatformBadge from './PlatformBadge'
 
 export default function AddRideModal({
   isOpen,
@@ -119,28 +120,49 @@ export default function AddRideModal({
           {/* Platform Selector Buttons */}
           <div className="form-group">
             <label className="form-label">
-              <span>แพลตฟอร์ม</span>
+              <span>เลือกแพลตฟอร์ม</span>
               <Car size={14} />
             </label>
-            <div className="platform-selector">
+            {/* Top 3 Platforms: Grab, Bolt, Line Man */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', marginBottom: '8px' }}>
               <button
                 type="button"
                 className={`platform-btn ${platform === 'Grab' ? 'active grab' : ''}`}
                 onClick={() => setPlatform('Grab')}
+                style={{ padding: '8px 4px', flexDirection: 'column', gap: '4px' }}
               >
-                <span style={{ fontWeight: 800 }}>GRAB</span>
+                <PlatformBadge platform="Grab" size="md" showText={false} />
+                <span style={{ fontSize: '0.76rem', fontWeight: 800 }}>GRAB</span>
               </button>
               <button
                 type="button"
                 className={`platform-btn ${platform === 'Bolt' ? 'active bolt' : ''}`}
                 onClick={() => setPlatform('Bolt')}
+                style={{ padding: '8px 4px', flexDirection: 'column', gap: '4px' }}
               >
-                <span style={{ fontWeight: 800 }}>BOLT</span>
+                <PlatformBadge platform="Bolt" size="md" showText={false} />
+                <span style={{ fontSize: '0.76rem', fontWeight: 800 }}>BOLT</span>
+              </button>
+              <button
+                type="button"
+                className={`platform-btn ${platform === 'Line Man' ? 'active lineman' : ''}`}
+                onClick={() => setPlatform('Line Man')}
+                style={{
+                  padding: '8px 4px',
+                  flexDirection: 'column',
+                  gap: '4px',
+                  borderColor: platform === 'Line Man' ? '#06c755' : undefined,
+                  background: platform === 'Line Man' ? 'rgba(6, 199, 85, 0.15)' : undefined
+                }}
+              >
+                <PlatformBadge platform="Line Man" size="md" showText={false} />
+                <span style={{ fontSize: '0.76rem', fontWeight: 800 }}>LINE MAN</span>
               </button>
             </div>
-            {/* Other platform selector option */}
+
+            {/* inDrive & Other options */}
             <div style={{ display: 'flex', gap: '8px' }}>
-              {['Line Man', 'inDrive', 'Other'].map((p) => (
+              {['inDrive', 'Other'].map((p) => (
                 <button
                   key={p}
                   type="button"
@@ -151,13 +173,17 @@ export default function AddRideModal({
                     border: `1px solid ${platform === p ? '#fff' : 'var(--border-subtle)'}`,
                     color: platform === p ? '#fff' : 'var(--text-secondary)',
                     borderRadius: 'var(--radius-sm)',
-                    padding: '6px',
-                    fontSize: '0.75rem',
+                    padding: '8px',
+                    fontSize: '0.78rem',
                     fontWeight: 600,
-                    cursor: 'pointer'
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '6px'
                   }}
                 >
-                  {p}
+                  <PlatformBadge platform={p} size="sm" showText={true} />
                 </button>
               ))}
             </div>
