@@ -57,7 +57,7 @@ export default function Auth({ onAuthSuccess }) {
   return (
     <div className="auth-wrapper">
       <div className="auth-card">
-        <img src="./logo.jpeg" alt="Net Ride Logo" className="auth-logo" />
+        <img src="./image.png" alt="Net Ride Logo" className="auth-logo" />
         <h2 style={{ fontSize: '1.6rem', fontWeight: 800, marginBottom: '4px' }}>NET RIDE</h2>
         <p style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', marginBottom: '16px' }}>
           Ride-Hailing Income & Cost Calculator

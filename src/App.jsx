@@ -318,7 +318,7 @@ export default function App() {
         color: 'var(--text-secondary)'
       }}>
         <div style={{ textAlign: 'center' }}>
-          <img src="./logo.jpeg" alt="Logo" style={{ width: '64px', borderRadius: '16px', marginBottom: '12px' }} />
+          <img src="./image.png" alt="Logo" style={{ width: '72px', height: '72px', objectFit: 'contain', filter: 'drop-shadow(0 6px 16px rgba(16, 185, 129, 0.3))', marginBottom: '12px' }} />
           <div>กำลังโหลด Net Ride...</div>
         </div>
       </div>
