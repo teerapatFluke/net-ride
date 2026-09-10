@@ -70,6 +70,33 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
     }
 
     const filename = `net-ride-export-${filterMode}-${new Date().toISOString().split('T')[0]}.csv`
+
+    // Case 1: Running inside LINE / LIFF Browser -> Auto switch to external browser (Safari / Chrome)
+    if (isLineBrowser) {
+      try {
+        const payload = JSON.stringify({ filename, content: csvString })
+        const encoded = btoa(unescape(encodeURIComponent(payload)))
+        const baseUrl = `${window.location.origin}${window.location.pathname}`
+        const targetUrl = `${baseUrl}?openExternalBrowser=1#download=${encoded}`
+
+        // If LIFF SDK is available in client, use official external window method
+        if (typeof window !== 'undefined' && window.liff && window.liff.isInClient && window.liff.isInClient()) {
+          window.liff.openWindow({ url: targetUrl, external: true })
+        } else {
+          // Standard LINE external browser redirection
+          const win = window.open(targetUrl, '_blank')
+          if (!win) {
+            window.location.href = targetUrl
+          }
+        }
+        onClose()
+        return
+      } catch (err) {
+        console.error('Error redirecting to external browser from LINE:', err)
+      }
+    }
+
+    // Case 2: Standard Desktop / Non-LINE Mobile Browser
     const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' })
 
     // 1. Try Native Web Share API first (Native iOS / Android Share Sheet)
@@ -174,7 +201,7 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
             color: '#86efac',
             lineHeight: 1.5
           }}>
-            <strong>💡 คำแนะนำบน LINE:</strong> เบราว์เซอร์ LINE ไม่อนุญาตให้ดาวน์โหลดไฟล์ลงเครื่องโดยตรง แนะนำให้กด <strong>"คัดลอกข้อมูล"</strong> หรือกด <strong>"เปิดใน Safari / Chrome"</strong> ด้านล่างครับ
+            <strong>⚡ ตรวจพบการใช้งานบน LINE:</strong> เมื่อแตะดาวน์โหลด ระบบจะสลับไปเปิด <strong>Safari / Chrome</strong> เพื่อเริ่มเซฟไฟล์ CSV ลงเครื่องให้อัตโนมัติทันทีครับ
           </div>
         )}
 
@@ -228,7 +255,7 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
 
         {/* Action Buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {/* Main Download / Share Button */}
+          {/* Main Download / Auto External Button */}
           <button
             type="button"
             className="btn-submit"
@@ -242,8 +269,10 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
               padding: '12px'
             }}
           >
-            <Download size={16} />
-            <span>ดาวน์โหลด / แชร์ไฟล์ CSV</span>
+            {isLineBrowser ? <ExternalLink size={16} /> : <Download size={16} />}
+            <span>
+              {isLineBrowser ? 'ดาวน์โหลด CSV (เปิดใน Safari/Chrome อัตโนมัติ)' : 'ดาวน์โหลด / แชร์ไฟล์ CSV'}
+            </span>
           </button>
 
           {/* Copy CSV to Clipboard Button */}
@@ -270,31 +299,6 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
             {copied ? <Check size={16} /> : <Copy size={16} />}
             <span>{copied ? '✓ คัดลอกข้อมูล CSV สำเร็จแล้ว!' : 'คัดลอกข้อมูล CSV (นำไปวางใน Sheets / Excel)'}</span>
           </button>
-
-          {/* Open in external browser for LINE LIFF */}
-          {isLineBrowser && (
-            <button
-              type="button"
-              onClick={handleOpenExternal}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '8px',
-                width: '100%',
-                padding: '10px',
-                background: 'transparent',
-                border: '1px dashed rgba(255, 255, 255, 0.2)',
-                borderRadius: 'var(--radius-md)',
-                color: 'var(--text-secondary)',
-                fontSize: '0.8rem',
-                cursor: 'pointer'
-              }}
-            >
-              <ExternalLink size={14} />
-              <span>เปิดใน Safari / Chrome เพื่อดาวน์โหลดไฟล์</span>
-            </button>
-          )}
 
           <button
             type="button"

@@ -9,10 +9,27 @@ import SettingsModal from './components/SettingsModal'
 import ExportModal from './components/ExportModal'
 import CalendarModal from './components/CalendarModal'
 import Auth from './components/Auth'
+import DownloadLanding from './components/DownloadLanding'
 import { Plus, ShieldAlert } from 'lucide-react'
 import { getTodayString } from './lib/dateUtils'
 
 export default function App() {
+  const [externalDownloadData, setExternalDownloadData] = useState(() => {
+    if (typeof window === 'undefined') return null
+    const hash = window.location.hash
+    if (hash && hash.startsWith('#download=')) {
+      try {
+        const raw = hash.replace('#download=', '')
+        const jsonStr = decodeURIComponent(escape(atob(raw)))
+        return JSON.parse(jsonStr)
+      } catch (e) {
+        console.error('Failed to parse download payload from URL hash', e)
+        return null
+      }
+    }
+    return null
+  })
+
   const [session, setSession] = useState(() => {
     try {
       const saved = localStorage.getItem('netride_custom_session')
@@ -306,6 +323,21 @@ export default function App() {
       await supabase.auth.signOut()
       setSession(null)
     }
+  }
+
+  // Handle direct download when redirected from LINE to external browser
+  if (externalDownloadData) {
+    return (
+      <DownloadLanding
+        downloadData={externalDownloadData}
+        onExit={() => {
+          try {
+            window.location.hash = ''
+          } catch {}
+          setExternalDownloadData(null)
+        }}
+      />
+    )
   }
 
   if (loading) {
