@@ -1,12 +1,14 @@
 import React, { useState } from 'react'
-import { X, Download, FileSpreadsheet, Check } from 'lucide-react'
+import { X, Download, FileSpreadsheet, Check, Copy, Share2, ExternalLink } from 'lucide-react'
 
 export default function ExportModal({ isOpen, onClose, allRides }) {
   if (!isOpen) return null
 
   const [filterMode, setFilterMode] = useState('all') // 'all' | 'month'
+  const [copied, setCopied] = useState(false)
+  const isLineBrowser = typeof navigator !== 'undefined' && /Line\//i.test(navigator.userAgent)
 
-  const handleExportCSV = () => {
+  const generateCSVContent = () => {
     let exportData = [...allRides]
 
     if (filterMode === 'month') {
@@ -15,8 +17,7 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
     }
 
     if (exportData.length === 0) {
-      alert('ไม่มีข้อมูลสำหรับส่งออก')
-      return
+      return null
     }
 
     // Sort by date ascending
@@ -58,16 +59,89 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
       csvRows.push(row.join(','))
     }
 
-    // Add UTF-8 BOM for Excel Thai language support
-    const blob = new Blob(['\uFEFF' + csvRows.join('\n')], { type: 'text/csv;charset=utf-8;' })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.setAttribute('download', `net-ride-export-${filterMode}-${new Date().toISOString().split('T')[0]}.csv`)
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
+    return csvRows.join('\n')
+  }
+
+  const handleExportCSV = async () => {
+    const csvString = generateCSVContent()
+    if (!csvString) {
+      alert('ไม่มีข้อมูลสำหรับส่งออก')
+      return
+    }
+
+    const filename = `net-ride-export-${filterMode}-${new Date().toISOString().split('T')[0]}.csv`
+    const blob = new Blob(['\uFEFF' + csvString], { type: 'text/csv;charset=utf-8;' })
+
+    // 1. Try Native Web Share API first (Native iOS / Android Share Sheet)
+    if (typeof navigator !== 'undefined' && navigator.canShare) {
+      try {
+        const file = new File([blob], filename, { type: 'text/csv;charset=utf-8' })
+        if (navigator.canShare({ files: [file] })) {
+          await navigator.share({
+            files: [file],
+            title: 'ส่งออกข้อมูล NetRide',
+            text: filename,
+          })
+          onClose()
+          return
+        }
+      } catch (err) {
+        if (err.name === 'AbortError') {
+          // User dismissed the share sheet
+          return
+        }
+        console.warn('Web Share failed, attempting standard download fallback:', err)
+      }
+    }
+
+    // 2. Standard <a> download for Desktop and browsers that support it
+    try {
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.setAttribute('download', filename)
+      link.style.display = 'none'
+      document.body.appendChild(link)
+      link.click()
+      setTimeout(() => {
+        document.body.removeChild(link)
+        URL.revokeObjectURL(url)
+      }, 1000)
+    } catch (e) {
+      console.error('Download link error:', e)
+    }
+
     onClose()
+  }
+
+  const handleCopyCSV = async () => {
+    const csvString = generateCSVContent()
+    if (!csvString) {
+      alert('ไม่มีข้อมูลสำหรับส่งออก')
+      return
+    }
+
+    try {
+      if (navigator?.clipboard?.writeText) {
+        await navigator.clipboard.writeText(csvString)
+      } else {
+        const textarea = document.createElement('textarea')
+        textarea.value = csvString
+        document.body.appendChild(textarea)
+        textarea.select()
+        document.execCommand('copy')
+        document.body.removeChild(textarea)
+      }
+      setCopied(true)
+      setTimeout(() => setCopied(false), 3000)
+    } catch (err) {
+      alert('ไม่สามารถคัดลอกได้ กรุณาลองใหม่อีกครั้ง')
+    }
+  }
+
+  const handleOpenExternal = () => {
+    const currentUrl = window.location.href.split('?')[0]
+    window.open(`${currentUrl}?openExternalBrowser=1`, '_blank')
   }
 
   return (
@@ -85,8 +159,24 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
         </div>
 
         <p style={{ fontSize: '0.85rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
-          ดาวน์โหลดประวัติการขับและรายได้เป็นไฟล์ Excel / CSV เพื่อจัดเก็บหรือคำนวณภาษี
+          ส่งออกประวัติการขับและรายได้เป็นไฟล์ Excel / CSV เพื่อจัดเก็บหรือคำนวณภาษี
         </p>
+
+        {/* LINE Browser Notice */}
+        {isLineBrowser && (
+          <div style={{
+            background: 'rgba(6, 199, 85, 0.12)',
+            border: '1px solid rgba(6, 199, 85, 0.3)',
+            borderRadius: 'var(--radius-md)',
+            padding: '10px 12px',
+            marginBottom: '16px',
+            fontSize: '0.78rem',
+            color: '#86efac',
+            lineHeight: 1.5
+          }}>
+            <strong>💡 คำแนะนำบน LINE:</strong> เบราว์เซอร์ LINE ไม่อนุญาตให้ดาวน์โหลดไฟล์ลงเครื่องโดยตรง แนะนำให้กด <strong>"คัดลอกข้อมูล"</strong> หรือกด <strong>"เปิดใน Safari / Chrome"</strong> ด้านล่างครับ
+          </div>
+        )}
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '20px' }}>
           <label style={{
@@ -136,18 +226,83 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
           </label>
         </div>
 
-        <div className="modal-actions">
-          <button type="button" className="btn-secondary" onClick={onClose}>
-            ยกเลิก
-          </button>
+        {/* Action Buttons */}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          {/* Main Download / Share Button */}
           <button
             type="button"
             className="btn-submit"
             onClick={handleExportCSV}
-            style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              width: '100%',
+              padding: '12px'
+            }}
           >
             <Download size={16} />
-            <span>ดาวน์โหลด CSV</span>
+            <span>ดาวน์โหลด / แชร์ไฟล์ CSV</span>
+          </button>
+
+          {/* Copy CSV to Clipboard Button */}
+          <button
+            type="button"
+            onClick={handleCopyCSV}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              width: '100%',
+              padding: '11px',
+              background: copied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.06)',
+              border: `1px solid ${copied ? 'var(--emerald-400)' : 'var(--border-subtle)'}`,
+              borderRadius: 'var(--radius-md)',
+              color: copied ? 'var(--emerald-400)' : '#fff',
+              fontSize: '0.86rem',
+              fontWeight: 600,
+              cursor: 'pointer',
+              transition: 'all 0.2s'
+            }}
+          >
+            {copied ? <Check size={16} /> : <Copy size={16} />}
+            <span>{copied ? '✓ คัดลอกข้อมูล CSV สำเร็จแล้ว!' : 'คัดลอกข้อมูล CSV (นำไปวางใน Sheets / Excel)'}</span>
+          </button>
+
+          {/* Open in external browser for LINE LIFF */}
+          {isLineBrowser && (
+            <button
+              type="button"
+              onClick={handleOpenExternal}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                width: '100%',
+                padding: '10px',
+                background: 'transparent',
+                border: '1px dashed rgba(255, 255, 255, 0.2)',
+                borderRadius: 'var(--radius-md)',
+                color: 'var(--text-secondary)',
+                fontSize: '0.8rem',
+                cursor: 'pointer'
+              }}
+            >
+              <ExternalLink size={14} />
+              <span>เปิดใน Safari / Chrome เพื่อดาวน์โหลดไฟล์</span>
+            </button>
+          )}
+
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={onClose}
+            style={{ width: '100%', padding: '10px', marginTop: '4px' }}
+          >
+            ปิด
           </button>
         </div>
       </div>
