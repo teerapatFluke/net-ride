@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { X, Download, FileSpreadsheet, Check, Copy, Share2, ExternalLink } from 'lucide-react'
+import { X, Download, FileSpreadsheet, Check, Copy, Share2, ExternalLink, Send } from 'lucide-react'
 
 export default function ExportModal({ isOpen, onClose, allRides }) {
   if (!isOpen) return null
@@ -62,6 +62,27 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
     return csvRows.join('\n')
   }
 
+  const handleSendToLine = () => {
+    const csvString = generateCSVContent()
+    if (!csvString) {
+      alert('ไม่มีข้อมูลสำหรับส่งออก')
+      return
+    }
+
+    const filename = `net-ride-export-${filterMode}-${new Date().toISOString().split('T')[0]}.csv`
+    const payload = JSON.stringify({ filename, content: csvString })
+    const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(payload))))
+    const baseUrl = `${window.location.origin}${window.location.pathname}`
+    const targetUrl = `${baseUrl}?openExternalBrowser=1&dl=${encoded}#download=${encoded}`
+
+    const msg = `📊 รายงานข้อมูลการขับ NetRide (${filename})\nแตะลิงก์ด้านล่างเพื่อดาวน์โหลดไฟล์ CSV:\n${targetUrl}`
+    const lineShareUrl = `https://line.me/R/msg/text/?${encodeURIComponent(msg)}`
+
+    // Open LINE native share target directly
+    window.location.href = lineShareUrl
+    onClose()
+  }
+
   const handleExportCSV = async () => {
     const csvString = generateCSVContent()
     if (!csvString) {
@@ -79,9 +100,12 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
         const baseUrl = `${window.location.origin}${window.location.pathname}`
         const targetUrl = `${baseUrl}?openExternalBrowser=1&dl=${encoded}#download=${encoded}`
 
-        // Method 1: LINE LIFF official native openWindow
+        // Ensure LIFF is initialized before calling openWindow
         if (typeof window !== 'undefined' && window.liff) {
           try {
+            if (!window.liff.id) {
+              await window.liff.init({ liffId: '2011538034-u50VZuPm' })
+            }
             window.liff.openWindow({
               url: targetUrl,
               external: true
@@ -93,15 +117,8 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
           }
         }
 
-        // Method 2: Fallback to direct anchor element click
-        const a = document.createElement('a')
-        a.href = targetUrl
-        a.target = '_blank'
-        a.rel = 'noopener noreferrer'
-        document.body.appendChild(a)
-        a.click()
-        document.body.removeChild(a)
-        onClose()
+        // Fallback to sending to LINE chat
+        handleSendToLine()
         return
       } catch (err) {
         console.error('Error redirecting to external browser from LINE:', err)
@@ -267,25 +284,74 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
 
         {/* Action Buttons */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-          {/* Main Download / Auto External Button */}
-          <button
-            type="button"
-            className="btn-submit"
-            onClick={handleExportCSV}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '8px',
-              width: '100%',
-              padding: '12px'
-            }}
-          >
-            {isLineBrowser ? <ExternalLink size={16} /> : <Download size={16} />}
-            <span>
-              {isLineBrowser ? 'ดาวน์โหลด CSV (เปิดใน Safari/Chrome อัตโนมัติ)' : 'ดาวน์โหลด / แชร์ไฟล์ CSV'}
-            </span>
-          </button>
+          {isLineBrowser ? (
+            <>
+              {/* Primary on LINE: Send Download Link to LINE Chat */}
+              <button
+                type="button"
+                onClick={handleSendToLine}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  padding: '13px',
+                  background: 'linear-gradient(135deg, #06c755 0%, #05a847 100%)',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: 'var(--radius-md)',
+                  fontSize: '0.92rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 14px rgba(6, 199, 85, 0.3)'
+                }}
+              >
+                <Send size={18} />
+                <span>ส่งลิงก์ดาวน์โหลดเข้าแชท LINE (แนะนำ)</span>
+              </button>
+
+              {/* Secondary on LINE: Direct open in Safari/Chrome */}
+              <button
+                type="button"
+                className="btn-submit"
+                onClick={handleExportCSV}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  width: '100%',
+                  padding: '11px',
+                  background: 'rgba(255, 255, 255, 0.08)',
+                  border: '1px solid var(--border-subtle)',
+                  color: '#e2e8f0',
+                  fontSize: '0.85rem'
+                }}
+              >
+                <ExternalLink size={15} />
+                <span>เปิดดาวน์โหลดใน Safari / Chrome ทันที</span>
+              </button>
+            </>
+          ) : (
+            /* Desktop / Non-LINE standard download */
+            <button
+              type="button"
+              className="btn-submit"
+              onClick={handleExportCSV}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '8px',
+                width: '100%',
+                padding: '12px'
+              }}
+            >
+              <Download size={16} />
+              <span>ดาวน์โหลด / แชร์ไฟล์ CSV</span>
+            </button>
+          )}
 
           {/* Copy CSV to Clipboard Button */}
           <button
@@ -298,11 +364,11 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
               gap: '8px',
               width: '100%',
               padding: '11px',
-              background: copied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.06)',
+              background: copied ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.04)',
               border: `1px solid ${copied ? 'var(--emerald-400)' : 'var(--border-subtle)'}`,
               borderRadius: 'var(--radius-md)',
-              color: copied ? 'var(--emerald-400)' : '#fff',
-              fontSize: '0.86rem',
+              color: copied ? 'var(--emerald-400)' : '#cbd5e1',
+              fontSize: '0.85rem',
               fontWeight: 600,
               cursor: 'pointer',
               transition: 'all 0.2s'
@@ -316,7 +382,7 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
             type="button"
             className="btn-secondary"
             onClick={onClose}
-            style={{ width: '100%', padding: '10px', marginTop: '4px' }}
+            style={{ width: '100%', padding: '10px', marginTop: '2px' }}
           >
             ปิด
           </button>
