@@ -75,20 +75,32 @@ export default function ExportModal({ isOpen, onClose, allRides }) {
     if (isLineBrowser) {
       try {
         const payload = JSON.stringify({ filename, content: csvString })
-        const encoded = btoa(unescape(encodeURIComponent(payload)))
+        const encoded = encodeURIComponent(btoa(unescape(encodeURIComponent(payload))))
         const baseUrl = `${window.location.origin}${window.location.pathname}`
-        const targetUrl = `${baseUrl}?openExternalBrowser=1#download=${encoded}`
+        const targetUrl = `${baseUrl}?openExternalBrowser=1&dl=${encoded}#download=${encoded}`
 
-        // If LIFF SDK is available in client, use official external window method
-        if (typeof window !== 'undefined' && window.liff && window.liff.isInClient && window.liff.isInClient()) {
-          window.liff.openWindow({ url: targetUrl, external: true })
-        } else {
-          // Standard LINE external browser redirection
-          const win = window.open(targetUrl, '_blank')
-          if (!win) {
-            window.location.href = targetUrl
+        // Method 1: LINE LIFF official native openWindow
+        if (typeof window !== 'undefined' && window.liff) {
+          try {
+            window.liff.openWindow({
+              url: targetUrl,
+              external: true
+            })
+            onClose()
+            return
+          } catch (liffErr) {
+            console.warn('liff.openWindow error:', liffErr)
           }
         }
+
+        // Method 2: Fallback to direct anchor element click
+        const a = document.createElement('a')
+        a.href = targetUrl
+        a.target = '_blank'
+        a.rel = 'noopener noreferrer'
+        document.body.appendChild(a)
+        a.click()
+        document.body.removeChild(a)
         onClose()
         return
       } catch (err) {

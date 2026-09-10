@@ -14,21 +14,43 @@ import { Plus, ShieldAlert } from 'lucide-react'
 import { getTodayString } from './lib/dateUtils'
 
 export default function App() {
-  const [externalDownloadData, setExternalDownloadData] = useState(() => {
+  const parseDownloadData = () => {
     if (typeof window === 'undefined') return null
-    const hash = window.location.hash
-    if (hash && hash.startsWith('#download=')) {
-      try {
-        const raw = hash.replace('#download=', '')
-        const jsonStr = decodeURIComponent(escape(atob(raw)))
+    try {
+      // 1. Check query parameter ?dl=
+      const params = new URLSearchParams(window.location.search)
+      const queryDl = params.get('dl')
+      if (queryDl) {
+        const jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(queryDl))))
         return JSON.parse(jsonStr)
-      } catch (e) {
-        console.error('Failed to parse download payload from URL hash', e)
-        return null
       }
+      // 2. Check hash #download=
+      const hash = window.location.hash
+      if (hash && hash.startsWith('#download=')) {
+        const raw = hash.replace('#download=', '')
+        const jsonStr = decodeURIComponent(escape(atob(decodeURIComponent(raw))))
+        return JSON.parse(jsonStr)
+      }
+    } catch (e) {
+      console.error('Failed to parse download payload:', e)
     }
     return null
-  })
+  }
+
+  const [externalDownloadData, setExternalDownloadData] = useState(() => parseDownloadData())
+
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const data = parseDownloadData()
+      if (data) setExternalDownloadData(data)
+    }
+    window.addEventListener('hashchange', handleUrlChange)
+    window.addEventListener('popstate', handleUrlChange)
+    return () => {
+      window.removeEventListener('hashchange', handleUrlChange)
+      window.removeEventListener('popstate', handleUrlChange)
+    }
+  }, [])
 
   const [session, setSession] = useState(() => {
     try {
